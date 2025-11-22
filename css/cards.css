@@ -1,0 +1,58 @@
+#test {
+    --hover-act:rotate(-15deg);
+    /* --unhover-act: translateY(-50px); */
+    --card-gap: 10px;
+
+    height: 400px;
+    width: 10%;
+    border-radius: 20px;
+    padding: 5px;
+    transform:rotate(15deg);
+}
+
+#test::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 100%;
+    height: 10px;
+    background: transparent;
+    z-index: 10;
+}
+
+#test .card {
+
+    transition: transform 0.3s ease;
+    border-radius: 20px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    border: 1px solid black;
+
+}
+
+#test .card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    /* 向下延伸，覆盖上浮产生的空隙 */
+    width: 100%;
+    height: 30px;
+    /* 高度大于上浮距离(5px)即可 */
+    background: transparent;
+}
+
+#test .cardhead {
+    text-align: center;
+    width: 50px;
+    background-color: lightblue;
+    border-right: 1px solid black;
+    border-radius: 20px 0px 0px 20px;
+    padding: 10px;
+}
+
+#test .cardbody {
+    width: 300px;
+    background-color: #f0f0f0;
+    border-radius: 0px 20px 20px 0px;
+}

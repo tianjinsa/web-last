@@ -1,0 +1,26 @@
+.card {
+    display: flex;
+    height: 100%;
+    width: fit-content;
+    height: 100%;
+
+    --base-x: 0px;
+    --offset-x: 0px;
+    /* 使用 calc 组合变量 */
+    transform: translateX(calc(var(--base-x) + var(--offset-x))) var(--unhover-act);
+}
+
+
+
+.cardgroup {
+    /*可选全局配置*/
+    --hover-act: ;
+    --unhover-act: ;
+    --card-gap: ;
+
+    display: flex;
+    position: relative;
+    /* overflow-x: visible; */
+    /* 允许垂直方向溢出 (如果需要显示阴影或上浮效果) */
+}
+
