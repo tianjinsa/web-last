@@ -14,13 +14,11 @@
 
 .cardgroup {
     /*可选全局配置*/
-    --hover-act: ;
-    --unhover-act: ;
-    --card-gap: ;
+    --hover-act: ;/*卡片被悬停时的变换效果*/
+    --unhover-act: ;/*卡片未被悬停时的变换效果*/
+    --card-gap: ;/*卡片之间的间距*/
 
     display: flex;
     position: relative;
-    /* overflow-x: visible; */
-    /* 允许垂直方向溢出 (如果需要显示阴影或上浮效果) */
 }
 

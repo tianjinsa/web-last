@@ -1,0 +1,78 @@
+#doc-search {
+    /* --hover-act:rotate(-15deg); */
+    /* --unhover-act: translateY(-50px); */
+    --card-gap: 10px;
+
+    height: 600px; /* 增加高度以容纳内容 */
+    /* border-radius: 20px; */
+    /* padding: 5px; */
+    /* transform:rotate(15deg); */
+    position: relative; /* 确保子元素绝对定位相对于此容器 */
+    overflow: hidden;
+}
+
+#doc-search .card-t {
+    display: flex;
+    flex-direction: row; /* 确保左右排列 */
+    align-items: stretch; /* 高度拉伸 */
+    /* transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 更平滑的动画 */
+    border-radius: var(--radius-lg);
+    /* box-shadow: var(--shadow-xl); 使用统一阴影 */
+    /* border: 1px solid var(--border-soft); 使用统一边框颜色 */
+    background: var(--bg-panel); /* 使用统一背景色 */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    /* overflow: hidden; */
+    width: fit-content;
+    height: 100%;
+    top: 0;
+    left: 0;
+    transform-origin: bottom left; /* 旋转中心 */
+}
+
+#doc-search .cardhead {
+    text-align: center;
+    width: 60px; /* 稍微加宽 */
+    background: var(--bg-panel-strong); /* 使用统一深色背景 */
+    border-right: 1px solid var(--border-soft);
+    /* border-radius: 20px 0px 0px 20px; 由父容器 overflow:hidden 处理 */
+    padding: 20px 10px;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    color: var(--text-muted);
+    writing-mode: vertical-rl; /* 竖排文字 */
+    text-orientation: mixed;
+    font-weight: 600;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0; /* 防止被压缩 */
+    transition: color 0.3s ease;
+}
+
+#doc-search .card-t:hover .cardhead {
+    color: var(--accent);
+}
+
+#doc-search .cardbody {
+    width: 400px; /* 锁死宽度 */
+    flex-shrink: 0;
+    flex-direction: column;
+    background: transparent; /* 背景由父容器决定 */
+    /* border-radius: 0px 20px 20px 0px; 由父容器 overflow:hidden 处理 */
+    padding: 2rem;
+    overflow-y: auto; /* 内容过多时滚动 */
+    color: var(--text-primary);
+}
+
+/* 适配暗色/亮色模式的滚动条 */
+#doc-search .cardbody::-webkit-scrollbar {
+    width: 6px;
+}
+#doc-search .cardbody::-webkit-scrollbar-track {
+    background: transparent;
+}
+#doc-search .cardbody::-webkit-scrollbar-thumb {
+    background-color: var(--border-soft);
+    border-radius: 3px;
+}

@@ -1,0 +1,16 @@
+{
+    "css": [
+        ["css/bootstrap.min.css", 0],
+        ["css/style.css", 0],
+        ["mod/cards/css/cards.css", 0],
+        ["css/cards.css", 0]
+    ],
+    "js": [
+        ["js/marked.min.js", 0],
+        ["js/app.js", 0],
+        ["js/pages/about.js", 0],
+        ["js/pages/search.js", 0],
+        ["js/pages/document.js", 0],
+        ["mod/cards/js/cards.js", 0]
+    ]
+}

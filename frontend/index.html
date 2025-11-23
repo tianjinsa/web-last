@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="UTF-8">
+	<meta
+		name="viewport"
+		content="width=device-width, initial-scale=1.0"
+	>
+	<title>Document</title>
+</head>
+<style>
+	body {
+		background: linear-gradient(135deg, #170a34 0%, rgb(0, 22, 56) 100%);
+
+	}
+</style>
+<style id="first-load">
+	#first-load {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		font-size: 1.5rem;
+		color: #555;
+	}
+
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+
+	#first-load::before {
+		content: "";
+		display: inline-block;
+		margin-right: 0.5rem;
+		border: 2px solid #555;
+		border-top: 2px solid transparent;
+		border-radius: 50%;
+		width: 1rem;
+		height: 1rem;
+		animation: spin 1s linear infinite;
+	}
+</style>
+
+<body>
+    <!-- Loading Spinner -->
+	<div id="first-load">
+		正在加载资源，请稍候...
+	</div>
+
+    <!-- App Shell (Hidden until loaded) -->
+    <div id="app-shell" style="display: none;">
+        <header id="main-header" class="site-header py-3">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <a href="/" class="text-decoration-none" onclick="router.navigate('/'); return false;">
+                            <h3 class="m-0 text-white">My Blog</h3>
+                        </a>
+                    </div>
+                    <div class="col text-end" id="header-nav">
+                        <!-- Nav items injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main id="app-container" class="container mt-4 mb-5" style="min-height: 60vh;">
+            <div id="page-content"></div>
+        </main>
+
+        <footer id="main-footer" class="site-footer mt-auto py-3 text-center text-white-50">
+            <div class="container">
+                <p>&copy; 2025 My Blog</p>
+            </div>
+        </footer>
+    </div>
+</body>
+<script>
+</script>
+<script>
+	let CDN_URL = "{{ cdn_url }}";
+	function log(message, ...args) {
+		// if (typeof DEBUG !== 'undefined' && DEBUG)
+		console.log(`[资源加载器] ${message}`, ...args);
+	}
+	if (CDN_URL) {
+		log("CDN URL 为:", CDN_URL);
+	}
+	else {
+		log("CDN URL 未提供，使用本地资源。");
+	}
+</script>
+<script
+	id="first-load"
+	src="{{ cdn_url }}/js/load.js"
+></script>
+
+</html>

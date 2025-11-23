@@ -6,20 +6,17 @@ document.querySelectorAll('.cardgroup').forEach(group => {
     let allwidth = 0;
     let totleheadwidth = 0;
     const hoveract = window.getComputedStyle(group).getPropertyValue('--hover-act').trim();
-    // console.log(hoveract);
 
     cardlist.forEach((card, i) => {
         card.style.zIndex = i + 1;
         const body = cardlist[i].getElementsByClassName('cardbody')[0];
         // --- 获取计算后的样式 ---
         const computedStyle = window.getComputedStyle(card);
-        // 解析边框宽度 (parseFloat 会去掉 'px' 并转为数字，如果没有边框则为 0)
+        // 解析边框宽度
         const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
         const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
         const totalBorderWidth = borderLeft + borderRight;
 
-        // widthlist[i] = body.offsetWidth; // 原代码
-        // 如果你需要包含边框的宽度来计算偏移：
         widthlist[i] = body.offsetWidth + totalBorderWidth;
         const head = cardlist[i].getElementsByClassName('cardhead')[0];
         totleheadwidth += head.offsetWidth + totalBorderWidth;

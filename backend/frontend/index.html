@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Alpha Docs</title>
+	<script>
+		(function () {
+			const THEME_KEY = 'alpha-docs:theme';
+			try {
+				const stored = localStorage.getItem(THEME_KEY);
+				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				const theme = stored === 'light' || stored === 'dark' ? stored : (prefersDark ? 'dark' : 'light');
+				document.documentElement.setAttribute('data-theme', theme);
+			} catch (error) {
+				document.documentElement.setAttribute('data-theme', 'dark');
+			}
+		})();
+	</script>
+	<style>
+		:root {
+			color-scheme: dark;
+		}
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+			background: radial-gradient(circle at top, #1d1540 0%, #080b1f 70%);
+			font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+			min-height: 100%;
+			color: #f2f4ff;
+		}
+		#app-shell {
+			opacity: 0;
+			transition: opacity .4s ease;
+			min-height: 100vh;
+		}
+		#app-shell[data-shell="ready"] {
+			opacity: 1;
+		}
+		#first-load {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			font-size: 1.2rem;
+			letter-spacing: 2px;
+			color: #9da3c4;
+		}
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+		#first-load::before {
+			content: "";
+			display: inline-block;
+			margin-right: 0.5rem;
+			border: 2px solid #9da3c4;
+			border-top: 2px solid transparent;
+			border-radius: 50%;
+			width: 1rem;
+			height: 1rem;
+			animation: spin 1s linear infinite;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="first-load">正在加载资源，请稍候...</div>
+	
+	<script>
+		let CDN_URL = "{{ cdn_url }}";
+		function log(message, ...args) {
+			console.log(`[资源加载器] ${message}`, ...args);
+		}
+		if (CDN_URL) {
+			log("CDN URL 为:", CDN_URL);
+		} else {
+			log("CDN URL 未提供，使用本地资源。");
+		}
+	</script>
+	<script id="first-load" src="{{ cdn_url }}/js/load.js"></script>
+</body>
+
+</html>

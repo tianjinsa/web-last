@@ -1,0 +1,57 @@
+<div id="app-shell" class="app-shell" data-shell="booting">
+    <header id="site-header" class="site-header container-fluid" data-variant="default">
+        <div class="row" style="padding: 10px;">
+            <div class="col-12 header-bar ">
+                <div class="row u-items-center u-flex-nowrap">
+                    <div class="col">
+                        <a class="brand" href="/about" data-route="/about" aria-label="返回个人介绍">
+                            <img src="{{ cdn_url }}/logo-icon.svg" alt="Logo" class="brand-logo" loading="lazy" width="40" height="40">
+                            <div>
+                                <p class="brand-text">Alpha Docs</p>
+                                <p id="header-tagline" class="header-tagline">记录·分享·沉淀</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-auto">
+                        <nav class="site-nav" id="primary-nav" aria-label="主要导航" style="width: fit-content;">
+                            <div class="nav-pill"></div>
+                            <a href="/about" data-route="/about" data-nav="about">个人介绍</a>
+                            <a href="/docs" data-route="/docs" data-nav="docs-search">文档搜索</a>
+                            <a href="/docs/welcome" data-route="/docs/welcome" data-nav="docs-view">文档查看</a>
+                        </nav>
+                    </div>
+                    <div class="col-auto u-flex u-justify-end u-items-center u-gap-2">
+                        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换主题" aria-pressed="false">
+                            <span class="theme-toggle__icon" id="theme-toggle-icon" aria-hidden="true">🌙</span>
+                            <span class="theme-toggle__label" id="theme-toggle-label">夜间</span>
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="site-main" class="site-main" role="main">
+        <section class="skeleton">
+            <div class="skeleton-block"></div>
+            <div class="skeleton-block"></div>
+        </section>
+    </main>
+
+    <footer id="site-footer" class="site-footer">
+        <div class="footer-base">
+            <div>
+                <p class="brand-text">Alpha Docs</p>
+                <p id="footer-note" class="footer-note">构建知识森林</p>
+            </div>
+            <div class="footer-links">
+                <a href="/about" data-route="/about">个人介绍</a>
+                <a href="/docs" data-route="/docs">文档搜索</a>
+                <a href="/docs/welcome" data-route="/docs/welcome" id="footer-doc-link">文档查看</a>
+            </div>
+        </div>
+        <div id="footer-dynamic" class="footer-dynamic"></div>
+    </footer>
+</div>
+
