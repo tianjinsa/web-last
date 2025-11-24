@@ -47,5 +47,61 @@
             "description": "从基础移动到复杂加载效果，掌握 CSS @keyframes 动画的核心技巧。",
             "date": "2025-11-23"
         }
+    ],
+    "ifmhtml": [
+        {
+            "slug": "card-demo",
+            "title": "卡片演示",
+            "path": "articles/card-demo.html",
+            "category": "前端",
+            "tags": ["HTML", "CSS", "交互"],
+            "description": "卡片布局与交互效果的示例演示。",
+            "date": "2025-11-23"
+        },
+        {
+            "slug": "yuc",
+            "title": "动漫目录",
+            "path": "https://yuc.wiki/",
+            "category": "动漫",
+            "tags": [
+                "动漫"
+            ],
+            "description": "动漫目录网站。",
+            "date": "2025-11-23"
+        },
+        {
+            "slug": "zzc",
+            "title": "赵紫超课设",
+            "path": "http://matehub.top/",
+            "category": "赵紫超",
+            "tags": [
+                "课设"
+            ],
+            "description": "赵紫超的课程设计项目网站。",
+            "date": "2025-11-22"
+        },
+        {
+            "slug": "lyb",
+            "title": "李亚博课设",
+            "path": "https://status.dabbler.top/",
+            "category": "李亚博",
+            "tags": [
+                "课设"
+            ],
+            "description": "李亚博的课程设计项目网站。",
+            "date": "2024-11-22"
+        }
+        ,
+        {
+            "slug": "gemini-api",
+            "title": "个人gemini-api",
+            "path": "https://gemini.tianjinsa.top/dashboard",
+            "category": "gemini-api",
+            "tags": [
+                "api管理"
+            ],
+            "description": "gemini-api",
+            "date": "2024-11-22"
+        }
     ]
 }

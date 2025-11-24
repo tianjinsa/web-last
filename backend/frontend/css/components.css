@@ -219,13 +219,15 @@ textarea {
     left: 0;
     width: 4px;
     height: 100%;
+    border-radius: 0 100% 100% 0;
     background: var(--gradient-primary);
-    transform: scaleY(0);
+    transform: scaleY(0) scaleX(0);
     transition: transform var(--transition-base);
+    
 }
 
 .doc-card:hover::before {
-    transform: scaleY(1);
+    transform: scaleY(0.85)scaleX(1);
 }
 
 .doc-card:hover {
@@ -388,7 +390,7 @@ textarea {
    ======================================== */
 .doc-layout {
     position: relative;
-    max-width: 1200px;
+    max-width: var(--site-width);
     margin: 0 auto;
     /* flex 布局、方向和 gap 已由 Bootstrap 类处理 */
 }
@@ -690,4 +692,30 @@ textarea {
     z-index: 98;
     box-shadow: var(--shadow-lg);
     animation: slideUp var(--transition-base);
+}
+
+/* 文档页面移动端优化 */
+@media (max-width: 768px) {
+    .doc-layout {
+        padding: 0 var(--spacing-md);
+        max-width: var(--site-width);
+    }
+
+    /* 隐藏桌面 TOC（默认），提供浮动按钮打开 */
+    .doc-toc-container {
+        display: none;
+    }
+
+    .toc-toggle-btn {
+        display: flex;
+    }
+
+    .article-content {
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+    }
+
+    .doc-title {
+        font-size: 1.6rem;
+    }
 }

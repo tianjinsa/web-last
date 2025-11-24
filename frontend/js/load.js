@@ -28,7 +28,6 @@ history.replaceState = function () {
 loadall();
 
 function loadall() {
-    // 总是加载全局资源映射
     const mapUrl = `${CDN_URL}/res-map.json`;
     
     fetch(mapUrl)
@@ -57,7 +56,6 @@ function loadall() {
             }
 
             if (resMap['js']) {
-                // 顺序加载 JS
                 let chain = Promise.resolve();
                 resMap['js'].forEach(element => {
                     if(vis_rea[element[0]]) return;

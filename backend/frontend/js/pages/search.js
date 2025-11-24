@@ -36,7 +36,7 @@
                 <div id="doc-search" class="cardgroup">
                     <div class="card-t">
                         <div class="cardhead">文档标题 / 描述</div>
-                        <div class="cardbody" style="width: 400px;">
+                        <div class="cardbody search-input-panel">
                             <!-- 搜索输入框 -->
                             <input id="doc-search-input" type="search" placeholder="例如：Python、部署、架构..." autocomplete="off" />
                             
@@ -62,7 +62,7 @@
                     </div>
                     <div class="card-t">
                         <div class="cardhead" id="search-result-head">搜索结果</div>
-                        <div id="doc-search-results" class="cardbody doc-list" style="width: 500px;">
+                        <div id="doc-search-results" class="cardbody doc-list">
                             <!-- 结果列表将在此渲染 -->
                         </div>
                     </div>

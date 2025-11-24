@@ -380,6 +380,7 @@
 }
 
 /* 减少动画（系统设置） */
+/* 
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -388,7 +389,8 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-}
+} 
+*/
 
 /* ========================================
    特殊效果 - 文字打字机

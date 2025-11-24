@@ -71,6 +71,7 @@
                                 <button type="button" data-route="/docs" class="w-100 w-sm-auto">← 返回搜索</button>
                                 <button type="button" class="ghost-btn w-100 w-sm-auto" title="复制链接" id="copy-doc-link">复制链接</button>
                                 <button type="button" class="ghost-btn w-100 w-sm-auto" id="view-stats-btn">📊 访问统计</button>
+                                ${article.type === 'ifmhtml' ? '<button type="button" class="ghost-btn w-100 w-sm-auto" id="fullscreen-btn">⛶ 全屏阅读</button>' : ''}
                             </div>
                             
                             <!-- 文章头部信息 -->
@@ -137,14 +138,191 @@
 
                 // 渲染文章内容
                 try {
-                    const content = await spa.getArticleContent(article.slug);
                     const target = root.querySelector('#doc-markdown');
                     if (target) {
-                        // 根据类型渲染 HTML 或 Markdown
-                        if (article.type === 'html') {
-                            target.innerHTML = content;
+                        if (article.type === 'ifmhtml') {
+                            let src = article.path;
+                            // 如果是 http/https 开头的链接，直接使用，不走 CDN 处理
+                            if (!/^https?:\/\//i.test(src)) {
+                                src = spa.withCDN(src);
+                            }
+
+                            target.innerHTML = `
+                                <div class="ifm-wrapper">
+                                    <div class="ifm-container" style="position: relative; width: 100%; min-height: 400px; height: 800px;">
+                                        <iframe
+                                            src="${src}"
+                                            style="width: 100%; height: 100%; border: 0; border-radius: 8px;"
+                                            title="${article.title}"
+                                            allowfullscreen
+                                            loading="lazy"
+                                            sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"
+                                        ></iframe>
+                                    </div>
+                                </div>
+                            `;
+
+                            // 注入模态样式 (如果尚未注入)
+                            if (!document.getElementById('ifm-modal-style')) {
+                                const style = document.createElement('style');
+                                style.id = 'ifm-modal-style';
+                                style.textContent = `
+                                    .ifm-modal {
+                                        position: fixed;
+                                        inset: 0;
+                                        width: 100vw;
+                                        height: 100vh;
+                                        background: rgba(5, 8, 20, 0.85);
+                                        backdrop-filter: blur(8px);
+                                        -webkit-backdrop-filter: blur(8px);
+                                        display: none;
+                                        align-items: center;
+                                        justify-content: center;
+                                        z-index: 2000;
+                                        padding: 4vw;
+                                    }
+                                    .ifm-modal.is-open {
+                                        display: flex;
+                                        animation: fadeIn 250ms ease;
+                                    }
+                                    .ifm-modal__content {
+                                        position: relative;
+                                        width: min(1600px, 96vw);
+                                        height: min(1000px, 92vh);
+                                        background: var(--bg-panel);
+                                        border: 1px solid var(--border-medium);
+                                        border-radius: var(--radius-xl);
+                                        box-shadow: var(--shadow-lg);
+                                        overflow: hidden;
+                                    }
+                                    .ifm-modal__body {
+                                        position: relative;
+                                        width: 100%;
+                                        height: 100%;
+                                        overflow: hidden;
+                                    }
+                                    .ifm-modal__body .ifm-container {
+                                        width: 100%;
+                                        height: 100%;
+                                        margin: 0;
+                                        border-radius: 0;
+                                    }
+                                    .ifm-modal__body .ifm-container iframe {
+                                        border-radius: 0;
+                                        height: 100%;
+                                    }
+                                    .ifm-modal__close {
+                                        position: absolute;
+                                        top: 16px;
+                                        right: 16px;
+                                        width: 44px;
+                                        height: 44px;
+                                        border-radius: 50%;
+                                        background: rgba(0, 0, 0, 0.55);
+                                        color: #fff;
+                                        border: 1px solid rgba(255, 255, 255, 0.2);
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-size: 26px;
+                                        cursor: pointer;
+                                        opacity: 0;
+                                        transition: opacity 0.3s ease, transform 0.2s ease;
+                                    }
+                                    .ifm-modal__content:hover .ifm-modal__close {
+                                        opacity: 1;
+                                    }
+                                    .ifm-modal__close:hover {
+                                        background: var(--danger);
+                                        transform: scale(1.1) rotate(90deg);
+                                    }
+                                `;
+                                document.head.appendChild(style);
+                            }
+
+                            // 创建或复用模态 DOM
+                            let ifmModal = document.getElementById('ifm-modal');
+                            if (!ifmModal) {
+                                ifmModal = document.createElement('div');
+                                ifmModal.id = 'ifm-modal';
+                                ifmModal.className = 'ifm-modal';
+                                ifmModal.innerHTML = `
+                                    <div class="ifm-modal__content">
+                                        <button type="button" class="ifm-modal__close" title="退出全屏">×</button>
+                                        <div class="ifm-modal__body"></div>
+                                    </div>
+                                `;
+                                document.body.appendChild(ifmModal);
+                            }
+
+                            const modalBody = ifmModal.querySelector('.ifm-modal__body');
+                            const modalClose = ifmModal.querySelector('.ifm-modal__close');
+                            const fsBtn = root.querySelector('#fullscreen-btn');
+                            const wrapper = target.querySelector('.ifm-wrapper');
+                            const container = wrapper?.querySelector('.ifm-container');
+                            const iframeEl = container?.querySelector('iframe');
+                            const placeholder = document.createElement('div');
+                            placeholder.className = 'ifm-container-placeholder';
+                            let escHandler = null;
+
+                            if (iframeEl) {
+                                iframeEl.addEventListener('load', () => {
+                                    iframeEl.dataset.loaded = 'true';
+                                }, { once: true });
+                            }
+
+                            const closeModal = () => {
+                                if (modalBody && container && modalBody.contains(container)) {
+                                    if (wrapper && placeholder.parentNode === wrapper) {
+                                        wrapper.replaceChild(container, placeholder);
+                                    } else if (wrapper) {
+                                        wrapper.appendChild(container);
+                                    }
+                                }
+                                ifmModal.classList.remove('is-open');
+                                document.body.style.overflow = '';
+                                if (escHandler) {
+                                    document.removeEventListener('keydown', escHandler);
+                                    escHandler = null;
+                                }
+                            };
+
+                            const openModal = () => {
+                                if (!modalBody || !container || !wrapper) return;
+                                placeholder.style.height = `${container.offsetHeight}px`;
+                                wrapper.replaceChild(placeholder, container);
+                                modalBody.appendChild(container);
+                                ifmModal.classList.add('is-open');
+                                document.body.style.overflow = 'hidden';
+                                escHandler = (e) => {
+                                    if (e.key === 'Escape') closeModal();
+                                };
+                                document.addEventListener('keydown', escHandler);
+                            };
+
+                            if (ifmModal) {
+                                ifmModal.onclick = (event) => {
+                                    if (event.target === ifmModal) {
+                                        closeModal();
+                                    }
+                                };
+                            }
+
+                            if (modalClose) {
+                                modalClose.onclick = closeModal;
+                            }
+
+                            if (fsBtn) {
+                                fsBtn.addEventListener('click', openModal);
+                            }
                         } else {
-                            target.innerHTML = window.marked ? window.marked.parse(content) : content;
+                            const content = await spa.getArticleContent(article.slug);
+                            // 根据类型渲染 HTML 或 Markdown
+                            if (article.type === 'html') {
+                                target.innerHTML = content;
+                            } else {
+                                target.innerHTML = window.marked ? window.marked.parse(content) : content;
+                            }
                         }
                         
                         // 生成目录 (TOC)
@@ -193,9 +371,13 @@
                                 });
                             }
                         } else {
-                            // 如果没有标题，隐藏目录按钮
+                            // 如果没有标题，隐藏目录按钮和容器
                             const toggleBtn = root.querySelector('#toc-toggle');
                             if (toggleBtn) toggleBtn.style.display = 'none';
+                            if (tocEl) {
+                                tocEl.classList.remove('d-lg-block');
+                                tocEl.classList.add('d-none');
+                            }
                         }
                     }
                 } catch (error) {

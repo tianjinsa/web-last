@@ -265,11 +265,12 @@
             if (Array.isArray(data)) {
                 // 旧格式：纯数组
                 list = data.map(item => ({ ...item, type: 'md' }));
-            } else if (data && (data.md || data.html)) {
-                // 新格式：{ md: [], html: [] }
+            } else if (data && (data.md || data.html || data.ifmhtml)) {
+                // 新格式：{ md: [], html: [], ifmhtml: [] }
                 const md = (data.md || []).map(item => ({ ...item, type: 'md' }));
                 const html = (data.html || []).map(item => ({ ...item, type: 'html' }));
-                list = [...md, ...html];
+                const ifmhtml = (data.ifmhtml || []).map(item => ({ ...item, type: 'ifmhtml' }));
+                list = [...md, ...html, ...ifmhtml];
             }
 
             this.storeIndex(data);

@@ -15,8 +15,8 @@
     
     display: flex;
     gap: 0; /* 使用 --card-gap 控制间距 */
-    max-width: 1400px;
-    margin: 0 auto;
+    max-width: var(--site-width);
+    margin: 0 auto var(--spacing-xl);
     height: 600px;
     animation: fadeInUp var(--transition-slow);
     position: relative;
@@ -81,6 +81,8 @@
     width: 60px;
     background: var(--bg-panel-strong);
     border-right: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    overflow: hidden;
     padding: var(--spacing-xl) var(--spacing-sm);
     display: flex;
     flex-direction: column;
@@ -278,6 +280,17 @@ button.search-select.is-active {
 }
 
 /* ========================================
+   搜索面板特定宽度控制
+   ======================================== */
+.search-input-panel {
+    width: 400px;
+}
+
+#doc-search-results {
+    width: 500px;
+}
+
+/* ========================================
    响应式设计 - 使用 Bootstrap 类控制
    ======================================== */
 /* 
@@ -288,3 +301,53 @@ button.search-select.is-active {
   
   如果需要特定的样式调整，可以添加自定义类而不是媒体查询
 */
+
+/* 移动端卡片组调整 */
+@media (max-width: 768px) {
+    .cardgroup {
+        flex-direction: column;
+        align-items: stretch;
+        height: auto;
+        max-width: var(--site-width);
+        border-radius: var(--radius-md);
+    }
+
+    .card-t {
+        width: 100% !important;
+        min-height: auto;
+        height: auto !important;
+        transform: none !important;
+        display: block;
+        margin-bottom: var(--spacing-md);
+        border-radius: var(--radius-md);
+    }
+
+    /* 隐藏竖向侧头，改为在内容中显示标题/计数 */
+    .cardhead {
+        display: none;
+    }
+
+    .cardbody {
+        padding: var(--spacing-md);
+        height: auto;
+        overflow: visible;
+    }
+
+    .search-options {
+        flex-direction: column;
+    }
+
+    /* 搜索按钮与选择器更紧凑 */
+    .search-select,
+    button.search-select {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.95rem;
+    }
+
+    /* 搜索面板宽度在移动端自适应 */
+    .search-input-panel,
+    #doc-search-results {
+        width: 100% !important;
+    }
+}
