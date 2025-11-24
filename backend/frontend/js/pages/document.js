@@ -35,6 +35,12 @@
                 if (!root) return;
                 const article = articleMap?.get(params.slug);
                 
+                // 清理之前的模态框（如果存在）
+                const oldModal = document.getElementById('stats-modal');
+                if (oldModal) {
+                    oldModal.remove();
+                }
+                
                 // 404 处理
                 if (!article) {
                     root.innerHTML = `
@@ -95,20 +101,25 @@
                             </section>
                         </section>
                     </div>
+                `;
 
-                    <!-- 统计图表模态框 -->
-                    <div id="stats-modal" class="modal-overlay" style="display: none;">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h3>访问趋势 (7天)</h3>
-                                <button type="button" class="close-modal">×</button>
-                            </div>
-                            <div class="modal-body">
-                                <canvas id="stats-chart"></canvas>
-                            </div>
+                // 创建模态框（添加到 body，确保 fixed 定位正确）
+                const modal = document.createElement('div');
+                modal.id = 'stats-modal';
+                modal.className = 'modal-overlay';
+                modal.style.display = 'none';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>访问趋势 (7天)</h3>
+                            <button type="button" class="close-modal">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <canvas id="stats-chart" width="400" height="200"></canvas>
                         </div>
                     </div>
                 `;
+                document.body.appendChild(modal);
 
                 // 绑定复制链接功能
                 const copyBtn = root.querySelector('#copy-doc-link');
@@ -214,48 +225,67 @@
                         
                         // 图表逻辑 (Chart.js)
                         const btn = root.querySelector('#view-stats-btn');
-                        const modal = root.querySelector('#stats-modal');
-                        const close = root.querySelector('.close-modal');
-                        const canvas = root.querySelector('#stats-chart');
+                        const modalEl = document.getElementById('stats-modal');
+                        const closeBtn = modalEl?.querySelector('.close-modal');
+                        const canvas = modalEl?.querySelector('#stats-chart');
                         
-                        if (btn && modal && canvas) {
+                        if (btn && modalEl && canvas && closeBtn) {
                             btn.addEventListener('click', () => {
-                                modal.style.display = 'flex';
-                                if (window.myChart) {
-                                    window.myChart.destroy();
-                                    window.myChart = null;
-                                }
-                                if (window.Chart) {
-                                    const ctx = canvas.getContext('2d');
-                                    window.myChart = new window.Chart(ctx, {
-                                        type: 'line',
-                                        data: {
-                                            labels: stats.daily_visits.map(d => d.date),
-                                            datasets: [{
-                                                label: '每日访问',
-                                                data: stats.daily_visits.map(d => d.count),
-                                                borderColor: '#7b6cff',
-                                                backgroundColor: 'rgba(123, 108, 255, 0.1)',
-                                                fill: true,
-                                                tension: 0.4
-                                            }]
-                                        },
-                                        options: {
-                                            responsive: true,
-                                            plugins: { legend: { display: false } },
-                                            scales: {
-                                                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } },
-                                                x: { grid: { display: false } }
+                                console.log('Opening stats modal');
+                                modalEl.style.display = 'flex';
+                                
+                                // 确保模态框内容可见
+                                requestAnimationFrame(() => {
+                                    if (window.myChart) {
+                                        window.myChart.destroy();
+                                        window.myChart = null;
+                                    }
+                                    if (window.Chart) {
+                                        const ctx = canvas.getContext('2d');
+                                        window.myChart = new window.Chart(ctx, {
+                                            type: 'line',
+                                            data: {
+                                                labels: stats.daily_visits.map(d => d.date),
+                                                datasets: [{
+                                                    label: '每日访问',
+                                                    data: stats.daily_visits.map(d => d.count),
+                                                    borderColor: '#7b6cff',
+                                                    backgroundColor: 'rgba(123, 108, 255, 0.1)',
+                                                    fill: true,
+                                                    tension: 0.4
+                                                }]
+                                            },
+                                            options: {
+                                                responsive: true,
+                                                maintainAspectRatio: true,
+                                                interaction: {
+                                                    mode: 'index',
+                                                    intersect: false,
+                                                },
+                                                plugins: { legend: { display: false } },
+                                                scales: {
+                                                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.1)' } },
+                                                    x: { grid: { display: false } }
+                                                }
                                             }
-                                        }
-                                    });
-                                }
+                                        });
+                                    }
+                                });
                             });
                             
-                            close.addEventListener('click', () => modal.style.display = 'none');
-                            modal.addEventListener('click', (e) => {
-                                if (e.target === modal) modal.style.display = 'none';
+                            closeBtn.addEventListener('click', () => {
+                                console.log('Closing stats modal');
+                                modalEl.style.display = 'none';
                             });
+                            
+                            modalEl.addEventListener('click', (e) => {
+                                if (e.target === modalEl) {
+                                    console.log('Closing modal by clicking overlay');
+                                    modalEl.style.display = 'none';
+                                }
+                            });
+                        } else {
+                            console.warn('Stats modal elements not found:', { btn, modalEl, canvas, closeBtn });
                         }
                     }
                 } catch (e) {
