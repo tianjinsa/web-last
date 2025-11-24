@@ -7,21 +7,30 @@
         window.SPA.registerPage({
             name: 'about',
             navId: 'about',
+            // 匹配 /about 路由
             match: (path) => path === '/about',
+            
+            // 动态生成 Header
             header: ({ articles = [] }) => {
                 const latest = articles[0];
                 return {
-                tagline: '个人介绍 · 技术履历 · 创作定位',
-                pageTitle: '关于我 · Alpha Docs'
+                tagline: '课设',
+                pageTitle: 'Docs'
                 };
             },
+            
+            // 动态生成 Footer
             footer: () => ({
                 note: '保持好奇，持续递归自我',
                 extra: '<small>© 2025 Alpha Docs · Crafted with caffeine & curiosity.</small>'
             }),
+            
+            // 核心渲染逻辑
             render: ({ root, articles = [], tags = [] }) => {
                 if (!root) return;
+                // 估算总字数 (假设每篇 1200 字)
                 const totalWords = articles.length * 1200;
+                
                 root.innerHTML = `
                     <section class="page-section hero">
                         <p class="text-muted">Hi there 👋</p>

@@ -1,159 +1,51 @@
-[
-    {
-        "slug": "welcome",
-        "title": "欢迎使用我的博客",
-        "path": "articles/welcome.md",
-        "category": "公告",
-        "tags": ["公告", "起步"],
-        "description": "项目结构、运行方式与定制化入口的说明。",
-        "date": "2023-10-27"
-    },
-    {
-        "slug": "python-guide",
-        "title": "Python 后端开发指南",
-        "path": "articles/python-guide.md",
-        "category": "技术",
-        "tags": ["Python", "后端", "Flask"],
-        "description": "从环境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-26"
-    },
-    {
-        "slug": "python-guide45",
-        "title": "123",
-        "path": "articles/welcome copy.md",
-        "category": "123",
-        "tags": ["Pyt1hon", "后端", "Flask"],
-        "description": "从环222境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-22"
-    },
-    {
-        "slug": "python-guide",
-        "title": "Python 后端开发指南",
-        "path": "articles/python-guide.md",
-        "category": "技术",
-        "tags": [
-            "Python",
-            "后端",
-            "Flask"
-        ],
-        "description": "从环境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-26"
-    },
-    {
-        "slug": "python-guide45",
-        "title": "123",
-        "path": "articles/welcome copy.md",
-        "category": "123",
-        "tags": [
-            "Pyt1hon",
-            "后端",
-            "Flask"
-        ],
-        "description": "从环222境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-22"
-    },
-    {
-        "slug": "python-guide",
-        "title": "Python 后端开发指南",
-        "path": "articles/python-guide.md",
-        "category": "技术",
-        "tags": [
-            "Python",
-            "后端",
-            "Flask"
-        ],
-        "description": "从环境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-26"
-    },
-    {
-        "slug": "python-guide45",
-        "title": "123",
-        "path": "articles/welcome copy.md",
-        "category": "123",
-        "tags": [
-            "Pyt1hon",
-            "后端",
-            "Flask"
-        ],
-        "description": "从环222境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-22"
-    },
-    {
-        "slug": "python-guide",
-        "title": "Python 后端开发指南",
-        "path": "articles/python-guide.md",
-        "category": "技术",
-        "tags": [
-            "Python",
-            "后端",
-            "Flask"
-        ],
-        "description": "从环境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-26"
-    },
-    {
-        "slug": "python-guide45",
-        "title": "123",
-        "path": "articles/welcome copy.md",
-        "category": "123",
-        "tags": [
-            "Pyt1hon",
-            "后端",
-            "Flask"
-        ],
-        "description": "从环222境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-22"
-    },
-    {
-        "slug": "python-guide",
-        "title": "Python 后端开发指南",
-        "path": "articles/python-guide.md",
-        "category": "技术",
-        "tags": [
-            "Python",
-            "后端",
-            "Flask"
-        ],
-        "description": "从环境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-26"
-    },
-    {
-        "slug": "python-guide45",
-        "title": "123",
-        "path": "articles/welcome copy.md",
-        "category": "123",
-        "tags": [
-            "Pyt1hon",
-            "后端",
-            "Flask"
-        ],
-        "description": "从环222境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-22"
-    },
-    {
-        "slug": "python-guide",
-        "title": "Python 后端开发指南",
-        "path": "articles/python-guide.md",
-        "category": "技术",
-        "tags": [
-            "Python",
-            "后端",
-            "Flask"
-        ],
-        "description": "从环境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-26"
-    },
-    {
-        "slug": "python-guide45",
-        "title": "123",
-        "path": "articles/welcome copy.md",
-        "category": "123",
-        "tags": [
-            "Pyt1hon",
-            "后端",
-            "Flask"
-        ],
-        "description": "从环222境准备到部署的全流程后端最佳实践。",
-        "date": "2023-10-22"
-    }
-]
+{
+    "md": [
+        {
+            "slug": "welcome",
+            "title": "欢迎使用我的博客",
+            "path": "articles/welcome.md",
+            "category": "公告",
+            "tags": ["公告", "起步"],
+            "description": "项目结构、运行方式与定制化入口的说明。",
+            "date": "2023-10-27"
+        },
+        {
+            "slug": "python-guide",
+            "title": "Python 后端开发指南",
+            "path": "articles/python-guide.md",
+            "category": "技术",
+            "tags": ["Python", "后端", "Flask"],
+            "description": "从环境准备到部署的全流程后端最佳实践。",
+            "date": "2023-10-26"
+        },
+        {
+            "slug": "python-guide45",
+            "title": "123",
+            "path": "articles/welcome copy.md",
+            "category": "123",
+            "tags": ["Pyt1hon", "后端", "Flask"],
+            "description": "从环222境准备到部署的全流程后端最佳实践。",
+            "date": "2023-10-22"
+        }
+    ],
+    "html": [
+        {
+            "slug": "css-transform",
+            "title": "CSS Transform 属性详解",
+            "path": "articles/css-transform-guide.html",
+            "category": "前端",
+            "tags": ["CSS", "动画", "可视化"],
+            "description": "交互式指南：深入理解 CSS Transform 的平移、旋转、缩放与倾斜。",
+            "date": "2025-11-23"
+        },
+        {
+            "slug": "css-animation",
+            "title": "CSS 动画实战示例",
+            "path": "articles/css-animation-guide.html",
+            "category": "前端",
+            "tags": ["CSS", "动画", "Keyframes"],
+            "description": "从基础移动到复杂加载效果，掌握 CSS @keyframes 动画的核心技巧。",
+            "date": "2025-11-23"
+        }
+    ]
+}

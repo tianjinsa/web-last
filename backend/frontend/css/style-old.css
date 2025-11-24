@@ -88,6 +88,7 @@ body {
 }
 
 .brand {
+    
     display: flex;
     align-items: center;
     gap: 0.85rem;
@@ -101,6 +102,7 @@ body {
 .brand:hover {
     opacity: 0.8;
 }
+
 
 .brand-logo {
     width: 48px;
@@ -702,7 +704,6 @@ body {
     font-size: 1.5rem;
     cursor: pointer;
 }
-
 /* Custom Utilities (Replacements for Bootstrap) */
 .u-flex {
     display: flex !important;
@@ -726,35 +727,4 @@ body {
 
 .text-muted {
     color: var(--text-muted) !important;
-}
-
-.primary-btn {
-    padding: 0.6rem 1.5rem;
-    border-radius: 999px;
-    border: none;
-    background: var(--accent);
-    color: white;
-    cursor: pointer;
-    font-weight: 600;
-    transition: opacity 0.2s;
-}
-
-.primary-btn:hover {
-    opacity: 0.9;
-}
-
-.ghost-btn {
-    padding: 0.6rem 1.5rem;
-    border-radius: 999px;
-    border: 1px solid var(--border-soft);
-    background: transparent;
-    color: var(--text-primary);
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.2s, color 0.2s;
-}
-
-.ghost-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--accent);
 }

@@ -1,4 +1,11 @@
-// 单页应用资源加载器：一次性加载所有静态资源
+/**
+ * 资源加载器 (Loader)
+ * 
+ * 负责并行加载 CSS 和 JS 资源，并在加载完成后初始化应用。
+ * 采用 Manifest 机制 (index-map.json) 管理资源依赖。
+ */
+
+// 资源加载状态追踪
 const loadedResources = new Set();
 const manifestCache = new Map();
 const manifestPromises = new Map();
@@ -6,13 +13,16 @@ const manifestPromises = new Map();
 // 立即启动加载
 initApp();
 
+/**
+ * 应用初始化流程
+ */
 async function initApp() {
     log('开始初始化应用...');
     try {
-        // 0. 加载 main.html 结构
+        // 0. 加载 main.html 结构 (App Shell)
         await loadMainStructure();
 
-        // 无论当前路径如何，始终加载 index-map.json
+        // 无论当前路径如何，始终加载 index-map.json 获取资源清单
         const manifest = await fetchManifest('/index');
         
         const cssEntries = manifest?.css ?? [];
@@ -25,13 +35,12 @@ async function initApp() {
         // 顺序完全由 index-map.json 决定，利用 defer 属性保证执行顺序
         await Promise.all(loadEntries(jsEntries, 'js'));
         
-        // 3. 等待 CSS (可选，为了防止样式闪烁，最好也等一下，或者不等)
-        // 这里选择等待，确保样式就绪
+        // 3. 等待 CSS (可选，为了防止样式闪烁，最好也等一下)
         await cssTask;
 
         log('所有核心资源加载完毕');
 
-        // 5. 标记资源加载完成，通知 app.js
+        // 5. 标记资源加载完成，通知 app.js 启动 SPA
         window.__RESOURCES_LOADED__ = true;
         window.dispatchEvent(new Event('app-resources-loaded'));
 
@@ -42,6 +51,9 @@ async function initApp() {
     }
 }
 
+/**
+ * 加载主页面结构 (App Shell)
+ */
 async function loadMainStructure() {
     try {
         const url = withCDN('main.html');
@@ -49,15 +61,15 @@ async function loadMainStructure() {
         if (!response.ok) throw new Error('无法加载页面结构');
         let html = await response.text();
         
-        // Replace placeholders
+        // 替换 CDN 占位符
         const cdn = (CDN_URL || '').replace(/\/$/, '');
         html = html.replace(/\{\{\s*cdn_url\s*\}\}/g, cdn);
 
-        // Remove boot loader
+        // 移除启动加载动画
         const bootLoader = document.getElementById('boot-loader');
         if (bootLoader) bootLoader.remove();
 
-        // Inject into body
+        // 注入到 Body
         document.body.insertAdjacentHTML('afterbegin', html);
     } catch (error) {
         console.error('Main structure load failed', error);
@@ -66,6 +78,11 @@ async function loadMainStructure() {
     }
 }
 
+/**
+ * 处理 CDN 路径
+ * @param {string} path - 相对路径
+ * @returns {string} 完整 URL
+ */
 function withCDN(path) {
     if (!path) {
         return '';
@@ -78,6 +95,11 @@ function withCDN(path) {
     return base ? `${base}/${cleanPath}` : `/${cleanPath}`;
 }
 
+/**
+ * 获取资源清单 (Manifest)
+ * @param {string} key - Manifest 标识
+ * @returns {Promise<Object>}
+ */
 async function fetchManifest(key) {
     if (manifestCache.has(key)) {
         return manifestCache.get(key);
@@ -104,12 +126,19 @@ async function fetchManifest(key) {
     return promise;
 }
 
+/**
+ * 加载资源列表
+ * @param {Array} entries - 资源条目 [[path, mode], ...]
+ * @param {string} type - 'css' | 'js'
+ * @returns {Array<Promise>}
+ */
 function loadEntries(entries, type) {
     return entries.map(([ref, mode]) => {
         if (loadedResources.has(ref)) {
             return Promise.resolve();
         }
         return new Promise((resolve, reject) => {
+            // mode: 1 = 绝对路径, 0 = 相对路径 (需拼接 CDN)
             const url = mode === 1 ? ref : withCDN(ref);
             if (type === 'css') {
                 const link = document.createElement('link');
@@ -136,6 +165,9 @@ function loadEntries(entries, type) {
     });
 }
 
+/**
+ * 显示应用外壳，移除加载动画
+ */
 function revealShell() {
     log('所有资源加载完成，移除加载部分代码。');
     const shell = document.getElementById('app-shell');
