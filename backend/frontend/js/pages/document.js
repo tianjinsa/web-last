@@ -48,12 +48,12 @@
 
                 // 渲染基础骨架
                 root.innerHTML = `
-                    <div class="doc-layout">
+                    <div class="doc-layout d-flex flex-column flex-lg-row gap-4">
                         <!-- 目录容器 (初始隐藏) -->
-                        <aside class="doc-toc-container" id="doc-toc"></aside>
+                        <aside class="doc-toc-container d-none d-lg-block" id="doc-toc"></aside>
                         
                         <!-- 目录切换按钮 -->
-                        <button id="toc-toggle" class="toc-toggle-btn" title="目录">
+                        <button id="toc-toggle" class="toc-toggle-btn d-flex d-lg-none" title="目录">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                                 <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
                             </svg>
@@ -61,10 +61,10 @@
                         
                         <section class="doc-view" style="flex: 1; min-width: 0;">
                             <!-- 工具栏 -->
-                            <div class="doc-toolbar">
-                                <button type="button" data-route="/docs">← 返回搜索</button>
-                                <button type="button" class="ghost-btn" title="复制链接" id="copy-doc-link">复制链接</button>
-                                <button type="button" class="ghost-btn" id="view-stats-btn">📊 访问统计</button>
+                            <div class="doc-toolbar d-flex flex-column flex-sm-row gap-2">
+                                <button type="button" data-route="/docs" class="w-100 w-sm-auto">← 返回搜索</button>
+                                <button type="button" class="ghost-btn w-100 w-sm-auto" title="复制链接" id="copy-doc-link">复制链接</button>
+                                <button type="button" class="ghost-btn w-100 w-sm-auto" id="view-stats-btn">📊 访问统计</button>
                             </div>
                             
                             <!-- 文章头部信息 -->

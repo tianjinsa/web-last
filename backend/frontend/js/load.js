@@ -5,6 +5,11 @@
  * 采用 Manifest 机制 (index-map.json) 管理资源依赖。
  */
 
+// 日志函数（供其他模块使用）
+function log(message, ...args) {
+    console.log(`[资源加载器] ${message}`, ...args);
+}
+
 // 资源加载状态追踪
 const loadedResources = new Set();
 const manifestCache = new Map();

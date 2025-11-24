@@ -34,7 +34,7 @@
                 root.innerHTML = `
                     <section class="page-section hero">
                         <p class="text-muted">Hi there 👋</p>
-                        <h1 class="hero-title">我是一个热衷构建知识体系的全栈开发者。</h1>
+                        <h1 class="hero-title fs-1 fs-md-auto">我是一个热衷构建知识体系的全栈开发者。</h1>
                         <p>
                             我相信「文档即产品」。每一篇文章都经过拆解、重构与打磨，只为在需要的时候
                             能快速复用。这个 SPA 将个人介绍、文档检索与阅读体验聚合在同一页面里，

@@ -10,10 +10,14 @@
  * 3. 监听 mouseenter/mouseleave 事件更新状态。
  */
 function cardsInit() {
+    log("Initializing Cards Module");
+    
     document.querySelectorAll('.cardgroup').forEach(group => {
-        console.log("Initializing Card Group");
+        log("Found card group, initializing...");
         
         const cardlist = group.querySelectorAll('.card-t');
+        log(`Found ${cardlist.length} cards`);
+        
         const widthlist = [];
         let activeNode = null;
         let allwidth = 0;
@@ -21,6 +25,7 @@ function cardsInit() {
         
         // 获取 CSS 中定义的悬停激活状态值
         const hoveract = window.getComputedStyle(group).getPropertyValue('--hover-act').trim();
+        log(`Hover action value: "${hoveract}"`);
 
         cardlist.forEach((card, i) => {
             // 设置层级，保证后面的卡片在视觉上覆盖前面的（如果需要）
@@ -38,9 +43,12 @@ function cardsInit() {
 
             // 记录当前卡片内容的实际宽度
             widthlist[i] = body.offsetWidth + totalBorderWidth;
+            log(`Card ${i}: body width = ${body.offsetWidth}, border = ${totalBorderWidth}, total = ${widthlist[i]}`);
             
             const head = cardlist[i].getElementsByClassName('cardhead')[0];
-            totleheadwidth += head.offsetWidth + totalBorderWidth;
+            const headWidth = head.offsetWidth + totalBorderWidth;
+            totleheadwidth += headWidth;
+            log(`Card ${i}: head width = ${headWidth}, total head width = ${totleheadwidth}`);
             
             // 1. 设置基础堆叠位置 (--base-x)
             // 每张卡片向左偏移，抵消掉前面所有卡片的宽度，从而实现初始的紧凑排列（如果 CSS 是这样设计的）
@@ -93,11 +101,17 @@ function cardsInit() {
         const lastBody = lastCard.getElementsByClassName('cardbody')[0];
         const updateLastCardLayout = () => {
             if (cardlist.length === 0) return;
+            const groupWidth = group.offsetWidth;
+            log(`Group width: ${groupWidth}, Total head width: ${totleheadwidth}`);
+            
             // 检查是否有足够的剩余空间
-            if (totleheadwidth < group.offsetWidth - 100) {
+            if (totleheadwidth < groupWidth - 100) {
+                const newWidth = groupWidth - totleheadwidth;
+                log(`Setting last card body min-width to: ${newWidth}px`);
                 // 动态设置最后一张卡片的宽度以填满容器
-                lastBody.style.minWidth = (group.offsetWidth - totleheadwidth) + 'px';
+                lastBody.style.minWidth = newWidth + 'px';
             } else {
+                log(`Not enough space, keeping default width`);
                 lastBody.style.minWidth = '';
             }
         };

@@ -41,14 +41,14 @@
                             <input id="doc-search-input" type="search" placeholder="例如：Python、部署、架构..." autocomplete="off" />
                             
                             <!-- 排序与模糊搜索选项 -->
-                            <div class="search-options" style="display: flex; gap: 0.5rem;">
-                                <select id="doc-sort-select" class="search-select" style="flex: 1;">
+                            <div class="search-options d-flex flex-column flex-md-row" style="gap: 0.5rem;">
+                                <select id="doc-sort-select" class="search-select">
                                     <option value="date-desc">📅 时间 (最新)</option>
                                     <option value="date-asc">📅 时间 (最早)</option>
                                     <option value="title-asc">🔤 标题 (A-Z)</option>
                                     <option value="title-desc">🔤 标题 (Z-A)</option>
                                 </select>
-                                <button id="doc-fuzzy-toggle" class="search-select" style="flex: 0 0 auto; width: auto;" title="开启/关闭模糊匹配">
+                                <button id="doc-fuzzy-toggle" class="search-select w-md-auto" style="flex: 0 0 auto;" title="开启/关闭模糊匹配">
                                     ✨ 模糊
                                 </button>
                             </div>
@@ -62,7 +62,7 @@
                     </div>
                     <div class="card-t">
                         <div class="cardhead" id="search-result-head">搜索结果</div>
-                        <div id="doc-search-results" class="cardbody doc-list">
+                        <div id="doc-search-results" class="cardbody doc-list" style="width: 500px;">
                             <!-- 结果列表将在此渲染 -->
                         </div>
                     </div>
@@ -197,9 +197,13 @@
                 // 初始渲染
                 renderResultList();
 
-                // 初始化卡片动画 (如果有)
+                // 初始化卡片动画（确保 DOM 完全渲染后执行）
                 if (typeof window.cardsInit === 'function') {
-                    setTimeout(() => window.cardsInit(), 0);
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            window.cardsInit();
+                        });
+                    });
                 }
             }
         });

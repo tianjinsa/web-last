@@ -1,8 +1,9 @@
 {
     "css": [
         ["css/bootstrap.min.css", 0],
-        ["css/style.css", 0],
-        ["mod/cards/css/cards.css", 0],
+        ["css/main.css", 0],
+        ["css/components.css", 0],
+        ["css/animations.css", 0],
         ["css/cards.css", 0]
     ],
     "js": [
