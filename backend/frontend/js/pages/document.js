@@ -91,10 +91,8 @@
                             <!-- 评论区 -->
                             <section class="comments-section">
                                 <h3>评论</h3>
-                                <div class="comment-form">
-                                    <input type="text" id="comment-author" placeholder="您的昵称" maxlength="20">
-                                    <textarea id="comment-content" placeholder="写下您的想法..." rows="3"></textarea>
-                                    <button type="button" id="submit-comment" class="primary-btn">发表评论</button>
+                                <div class="comment-form" id="comment-form-container">
+                                    <!-- 动态渲染：登录状态或未登录提示 -->
                                 </div>
                                 <div id="comments-list" class="comments-list">
                                     <p class="text-muted">加载评论中...</p>
@@ -142,10 +140,18 @@
                     if (target) {
                         if (article.type === 'ifmhtml') {
                             let src = article.path;
-                            // 如果是 http/https 开头的链接，直接使用，不走 CDN 处理
-                            if (!/^https?:\/\//i.test(src)) {
+                            let proxied = false;
+                            const isAbsolute = /^https?:\/\//i.test(src);
+                            if (!isAbsolute) {
                                 src = spa.withCDN(src);
+                            } else if (/^http:\/\//i.test(src) && window.location.protocol === 'https:') {
+                                src = `/api/ifm-proxy?target=${encodeURIComponent(article.path)}`;
+                                proxied = true;
                             }
+
+                            const sandboxPermissions = proxied
+                                ? 'allow-scripts allow-forms allow-pointer-lock allow-downloads'
+                                : 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads';
 
                             target.innerHTML = `
                                 <div class="ifm-wrapper">
@@ -156,7 +162,7 @@
                                             title="${article.title}"
                                             allowfullscreen
                                             loading="lazy"
-                                            sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads"
+                                            sandbox="${sandboxPermissions}"
                                         ></iframe>
                                     </div>
                                 </div>
@@ -328,6 +334,8 @@
                         // 生成目录 (TOC)
                         const tocEl = root.querySelector('#doc-toc');
                         const headers = target.querySelectorAll('h2, h3');
+                        const commentsAnchor = 'comments-section';
+                        const commentsTitle = '💬 评论区';
                         if (tocEl && headers.length > 0) {
                             const ul = document.createElement('ul');
                             headers.forEach((header, index) => {
@@ -338,6 +346,15 @@
                                 li.innerHTML = `<a href="#${id}">${header.textContent}</a>`;
                                 ul.appendChild(li);
                             });
+                            // 添加评论区跳转
+                            const commentSection = document.getElementById(commentsAnchor) || root.querySelector('.comments-section');
+                            if (commentSection) {
+                                commentSection.id = commentsAnchor;
+                                const li = document.createElement('li');
+                                li.className = 'toc-comments';
+                                li.innerHTML = `<a href="#${commentsAnchor}">${commentsTitle}</a>`;
+                                ul.appendChild(li);
+                            }
                             tocEl.innerHTML = '<h4>目录</h4>';
                             tocEl.appendChild(ul);
                             
@@ -475,10 +492,30 @@
                 }
 
                 // 评论区逻辑
+                const commentFormContainer = root.querySelector('#comment-form-container');
                 const commentList = root.querySelector('#comments-list');
-                const submitBtn = root.querySelector('#submit-comment');
-                const authorInput = root.querySelector('#comment-author');
-                const contentInput = root.querySelector('#comment-content');
+                
+                // 检查登录状态并渲染评论表单
+                const user = window.SPA.getCurrentUser();
+                const token = localStorage.getItem('auth_token');
+                
+                if (user && token) {
+                    // 已登录 - 显示评论表单
+                    commentFormContainer.innerHTML = `
+                        <div class="logged-in-user">
+                            <span>以 <strong>${user.username}</strong> 的身份发表评论</span>
+                        </div>
+                        <textarea id="comment-content" placeholder="写下您的想法..." rows="3"></textarea>
+                        <button type="button" id="submit-comment" class="primary-btn">发表评论</button>
+                    `;
+                } else {
+                    // 未登录 - 显示登录提示
+                    commentFormContainer.innerHTML = `
+                        <div class="login-prompt">
+                            <p>您需要<a href="/auth" data-route="/auth">登录</a>后才能发表评论</p>
+                        </div>
+                    `;
+                }
 
                 const loadComments = async () => {
                     if (!commentList) return;
@@ -493,7 +530,7 @@
                             <div class="comment-item">
                                 <div class="comment-header">
                                     <span class="comment-author">${c.author}</span>
-                                    <span>${new Date(c.timestamp).toLocaleString()} · ${c.user_agent ? (c.user_agent.includes('Mobile') ? '📱 手机' : '💻 电脑') : '未知设备'}</span>
+                                    <span class="comment-time">${new Date(c.timestamp).toLocaleString()}</span>
                                 </div>
                                 <div class="comment-content">${c.content}</div>
                             </div>
@@ -505,39 +542,55 @@
 
                 loadComments();
 
-                submitBtn?.addEventListener('click', async () => {
-                    const author = authorInput.value.trim();
-                    const content = contentInput.value.trim();
-                    if (!author || !content) return alert('请填写昵称和内容');
+                // 如果已登录，绑定提交事件
+                if (user && token) {
+                    const submitBtn = root.querySelector('#submit-comment');
+                    const contentInput = root.querySelector('#comment-content');
                     
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = '提交中...';
-                    
-                    try {
-                        const res = await fetch('/api/comments', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                article_path: article.path,
-                                author,
-                                content
-                            })
-                        });
-                        if (res.ok) {
-                            authorInput.value = '';
-                            contentInput.value = '';
-                            loadComments();
-                        } else {
-                            const err = await res.json();
-                            alert(err.error || '提交失败');
+                    submitBtn?.addEventListener('click', async () => {
+                        const content = contentInput.value.trim();
+                        if (!content) return alert('请填写评论内容');
+                        
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = '提交中...';
+                        
+                        try {
+                            const res = await fetch('/api/comments', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({
+                                    article_path: article.path,
+                                    content
+                                })
+                            });
+                            
+                            if (res.status === 401) {
+                                localStorage.removeItem('auth_token');
+                                localStorage.removeItem('user');
+                                window.location.hash = '/auth';
+                                return;
+                            }
+                            
+                            if (res.ok) {
+                                const data = await res.json();
+                                contentInput.value = '';
+                                alert(data.message || '评论已提交');
+                                loadComments();
+                            } else {
+                                const err = await res.json();
+                                alert(err.error || '提交失败');
+                            }
+                        } catch (e) {
+                            alert('网络错误');
+                        } finally {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = '发表评论';
                         }
-                    } catch (e) {
-                        alert('网络错误');
-                    } finally {
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = '发表评论';
-                    }
-                });
+                    });
+                }
             }
         });
     };

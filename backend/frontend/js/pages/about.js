@@ -14,8 +14,8 @@
             header: ({ articles = [] }) => {
                 const latest = articles[0];
                 return {
-                tagline: '课设',
-                pageTitle: 'Docs'
+                tagline: '资源分享 · 经验分享',
+                pageTitle: '关于本站 · Alpha Docs'
                 };
             },
             
@@ -34,11 +34,10 @@
                 root.innerHTML = `
                     <section class="page-section hero">
                         <p class="text-muted">Hi there 👋</p>
-                        <h1 class="hero-title fs-1 fs-md-auto">我是一个热衷构建知识体系的全栈开发者。</h1>
+                        <h1 class="hero-title fs-1 fs-md-auto">Alpha Docs 是一个专注于资源整理与个人经验分享的知识小站。</h1>
                         <p>
-                            我相信「文档即产品」。每一篇文章都经过拆解、重构与打磨，只为在需要的时候
-                            能快速复用。这个 SPA 将个人介绍、文档检索与阅读体验聚合在同一页面里，
-                            并尽可能减少资源加载次数，让知识真正长留在浏览器缓存中。
+                            这里收录我在学习与工作中遇到的高质量资料、踩坑记录和复盘心得，按照主题分类整理，
+                            方便自己与朋友随时查阅。每篇内容都带着真实语境，既是经验总结也是可直接使用的参考指引。
                         </p>
                         <div class="hero-stats">
                             <article class="stat-card">
@@ -60,25 +59,25 @@
                     </section>
 
                     <section class="page-section glow-card">
-                        <h2>我在做什么？</h2>
+                        <h2>站点定位</h2>
                         <p>聚焦三个方向：
-                            <strong>1) 架构与后端</strong>（以 Python/Flask 为主），
-                            <strong>2) 前端体验</strong>（用纯 JS + CSS 打造丝滑交互），
-                            <strong>3) 文档工程</strong>（让知识具备可迭代性）。
+                            <strong>1) 精选资源沉淀</strong>（文档、工具与灵感合集），
+                            <strong>2) 实战经验复盘</strong>（真实项目的踩坑与解决方案），
+                            <strong>3) 长期学习航海日志</strong>（方法论与思考框架分享）。
                         </p>
                         <div class="doc-meta">
-                            <span>🧠 长期主义 · 复利思维</span>
+                            <span>🧠 资源共享 · 经验互助</span>
                             <span>🛠️ Build in public</span>
-                            <span>📚 Knowledge as a Service</span>
+                            <span>📚 Personal Knowledge Hub</span>
                         </div>
                     </section>
 
                     <section class="page-section">
                         <h2>近期计划</h2>
                         <ul>
-                            <li>补完文档流程自动化工具链，让文章元信息与渲染逻辑自动同步。</li>
-                            <li>将更多小型实验、片段式灵感沉淀为可检索的碎片化文档。</li>
-                            <li>把访客行为（仅路径）匿名化统计，用数据持续打磨体验。</li>
+                            <li>持续整理开发、设计、效率等方向的资源清单，并补充个人注释。</li>
+                            <li>把真实项目中的经验与踩坑案例写成文章，帮助后来者少走弯路。</li>
+                            <li>完善互动与统计机制，了解大家最想要的资源类型并持续迭代。</li>
                         </ul>
                     </section>
                 `;

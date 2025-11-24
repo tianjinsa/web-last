@@ -42,6 +42,7 @@
             this.refs.themeToggleLabel = document.getElementById('theme-toggle-label');
             
             this.setupThemeControls();
+            this.updateNavBar(); // 添加用户状态更新
             this.bindGlobalEvents();
             this.bootstrap();
         },
@@ -105,6 +106,7 @@
             try {
                 await this.ensureArticles();
                 this.syncDocShortcuts();
+                this.renderTopArticles(); // 加载热门文章
                 if (window.marked && !this.markedConfigured) {
                     window.marked.setOptions({ breaks: true, gfm: true });
                     this.markedConfigured = true;
@@ -115,6 +117,69 @@
                 return;
             }
             this.handleRoute();
+        },
+
+        /**
+         * 获取并渲染热门文章
+         */
+        async renderTopArticles() {
+            const container = document.getElementById('footer-top-articles');
+            if (!container) return;
+
+            container.classList.add('is-hidden');
+            container.classList.remove('empty-state');
+            container.innerHTML = '';
+
+            try {
+                const res = await fetch('/api/stats/top');
+                if (!res.ok) return;
+                const topList = await res.json();
+                if (!Array.isArray(topList) || topList.length === 0) {
+                    return;
+                }
+
+                const cards = topList.map((item, index) => {
+                    const article = this.getArticle(item.slug);
+                    const title = article?.title || `文档 ${item.slug}`;
+                    const description = article?.description || '点击查看详细内容。';
+                    const route = article ? `/docs/${article.slug}` : item.path;
+                    const viewCount = new Intl.NumberFormat('zh-CN').format(item.count || 0);
+                    return `
+                        <article class="top-article-card" data-route="${route}">
+                            <div class="top-article-rank">#${index + 1}</div>
+                            <h4>${title}</h4>
+                            <p>${description}</p>
+                            <div class="top-article-meta">
+                                <span>浏览 ${viewCount}</span>
+                                <button type="button">立即查看</button>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+
+                container.innerHTML = `
+                    <div class="top-articles-title">🔥 热门阅读</div>
+                    <div class="top-articles-grid">
+                        ${cards}
+                    </div>
+                `;
+
+                container.classList.remove('is-hidden');
+
+                container.querySelectorAll('[data-route]').forEach((el) => {
+                    el.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const route = el.getAttribute('data-route');
+                        if (route) {
+                            this.navigate(route);
+                        }
+                    });
+                });
+            } catch (e) {
+                container.classList.add('empty-state');
+                container.textContent = '热门内容加载失败，请稍后再试。';
+                console.warn('加载热门文章失败', e);
+            }
         },
 
         /**
@@ -196,6 +261,11 @@
                 
                 // 渲染新页面内容
                 await page.render(context);
+                
+                // 执行页面渲染后的逻辑 (事件绑定等)
+                if (typeof page.afterRender === 'function') {
+                    await page.afterRender(context);
+                }
                 
                 // 重置滚动条
                 window.scrollTo({ top: 0, behavior: 'instant' });
@@ -597,7 +667,177 @@
             } catch (error) {
                 console.warn('访问统计上报失败', error);
             }
-        }
+        },
+
+        /**
+         * 更新导航栏 - 添加用户状态和认证链接
+         */
+        updateNavBar() {
+            const nav = this.refs.nav;
+            if (!nav) return;
+            
+            // 移除旧的用户链接
+            const oldUserLinks = nav.querySelectorAll('.user-link');
+            oldUserLinks.forEach(link => link.remove());
+            
+            const user = this.getCurrentUser();
+            
+            if (user) {
+                // 已登录 - 显示用户名和登出按钮
+                const userInfo = document.createElement('a');
+                userInfo.href = '#';
+                userInfo.className = 'user-link';
+                userInfo.textContent = user.username;
+                userInfo.setAttribute('data-nav', 'user');
+                
+                // 用户下拉菜单逻辑 (简单实现：点击切换显示)
+                userInfo.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showUserMenu(user);
+                });
+                nav.appendChild(userInfo);
+                
+                const logoutLink = document.createElement('a');
+                logoutLink.href = '#';
+                logoutLink.className = 'user-link';
+                logoutLink.textContent = '登出';
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.logout();
+                });
+                nav.appendChild(logoutLink);
+            } else {
+                // 未登录 - 显示登录链接
+                const authLink = document.createElement('a');
+                authLink.href = '/auth';
+                authLink.className = 'user-link';
+                authLink.textContent = '登录/注册';
+                authLink.setAttribute('data-route', '/auth');
+                authLink.setAttribute('data-nav', 'auth');
+                nav.appendChild(authLink);
+            }
+        },
+
+        /**
+         * 获取当前登录用户
+         */
+        getCurrentUser() {
+            try {
+                const userStr = localStorage.getItem('user');
+                return userStr ? JSON.parse(userStr) : null;
+            } catch (error) {
+                return null;
+            }
+        },
+
+        /**
+         * 登出
+         */
+        logout() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
+            this.updateNavBar();
+            this.navigate('/about');
+            alert('已登出');
+        },
+
+        /**
+         * 显示用户菜单 (修改密码等)
+         */
+        showUserMenu(user) {
+            // 简单起见，使用 prompt 或者自定义 modal
+            // 这里我们创建一个简单的 Modal 来修改密码
+            const modalId = 'user-menu-modal';
+            let modal = document.getElementById(modalId);
+            
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = modalId;
+                modal.className = 'modal-overlay';
+                modal.style.display = 'none';
+                modal.innerHTML = `
+                    <div class="modal-content" style="max-width: 400px;">
+                        <div class="modal-header">
+                            <h3>用户设置</h3>
+                            <button type="button" class="close-modal">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <p>当前用户: <strong>${user.username}</strong></p>
+                            <hr>
+                            <h4>修改密码</h4>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label style="display:block; margin-bottom: 0.5rem;">旧密码</label>
+                                <input type="password" id="change-pwd-old" class="form-control" style="width: 100%; padding: 0.5rem;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label style="display:block; margin-bottom: 0.5rem;">新密码</label>
+                                <input type="password" id="change-pwd-new" class="form-control" style="width: 100%; padding: 0.5rem;">
+                            </div>
+                            <button id="do-change-pwd" class="primary-btn" style="width: 100%;">确认修改</button>
+                            <div id="change-pwd-msg" style="margin-top: 1rem; font-size: 0.9rem;"></div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                // 绑定关闭事件
+                const closeBtn = modal.querySelector('.close-modal');
+                closeBtn.onclick = () => modal.style.display = 'none';
+                modal.onclick = (e) => {
+                    if (e.target === modal) modal.style.display = 'none';
+                };
+                
+                // 绑定修改密码事件
+                const doBtn = modal.querySelector('#do-change-pwd');
+                doBtn.onclick = async () => {
+                    const oldPwd = document.getElementById('change-pwd-old').value;
+                    const newPwd = document.getElementById('change-pwd-new').value;
+                    const msgEl = document.getElementById('change-pwd-msg');
+                    
+                    if (!oldPwd || !newPwd) {
+                        msgEl.textContent = '请填写所有字段';
+                        msgEl.style.color = 'var(--danger)';
+                        return;
+                    }
+                    
+                    doBtn.disabled = true;
+                    doBtn.textContent = '处理中...';
+                    msgEl.textContent = '';
+                    
+                    try {
+                        const token = localStorage.getItem('auth_token');
+                        const res = await fetch('/api/auth/change-password', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ old_password: oldPwd, new_password: newPwd })
+                        });
+                        
+                        const data = await res.json();
+                        
+                        if (res.ok) {
+                            msgEl.textContent = '密码修改成功';
+                            msgEl.style.color = 'var(--success)';
+                            document.getElementById('change-pwd-old').value = '';
+                            document.getElementById('change-pwd-new').value = '';
+                        } else {
+                            msgEl.textContent = data.error || '修改失败';
+                            msgEl.style.color = 'var(--danger)';
+                        }
+                    } catch (e) {
+                        msgEl.textContent = '网络错误';
+                        msgEl.style.color = 'var(--danger)';
+                    } finally {
+                        doBtn.disabled = false;
+                        doBtn.textContent = '确认修改';
+                    }
+                };
+            }
+            
+            modal.style.display = 'flex';
+        },
     };
 
     window.SPA = SPA;

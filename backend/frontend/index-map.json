@@ -4,16 +4,19 @@
         ["css/main.css", 0],
         ["css/components.css", 0],
         ["css/animations.css", 0],
-        ["css/cards.css", 0]
+        ["css/cards.css", 0],
+        ["css/auth.css", 0]
     ],
     "js": [
         ["js/chart.js", 0],
         ["js/marked.min.js", 0],
         ["js/fuzzy.js", 0],
+        ["js/background.js", 0],
         ["js/app.js", 0],
         ["js/pages/about.js", 0],
         ["js/pages/search.js", 0],
         ["js/pages/document.js", 0],
+        ["js/pages/auth.js", 0],
         ["mod/cards/js/cards.js", 0]
     ]
 }

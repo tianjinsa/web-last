@@ -5,42 +5,55 @@
  */
 (function() {
     /**
-     * 模糊匹配算法
-     * 
-     * 检查 pattern 中的字符是否按顺序出现在 text 中。
-     * 例如：pattern="abc" 可以匹配 text="a_b_c"，但不能匹配 "acb"。
-     * 
-     * @param {string} text - 待搜索的源文本
-     * @param {string} pattern - 搜索关键词
-     * @returns {boolean} 是否匹配
+     * 计算 Levenshtein 编辑距离
      */
-    function fuzzyMatch(text, pattern) {
-        // 边界检查
-        if (!text || !pattern) return false;
-        
-        // 统一转换为小写，实现不区分大小写匹配
+    function levenshtein(a, b) {
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) {
+            matrix[i] = [i];
+        }
+        for (let j = 0; j <= a.length; j++) {
+            matrix[0][j] = j;
+        }
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                if (b.charAt(i - 1) == a.charAt(j - 1)) {
+                    matrix[i][j] = matrix[i - 1][j - 1];
+                } else {
+                    matrix[i][j] = Math.min(
+                        matrix[i - 1][j - 1] + 1,
+                        Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+                    );
+                }
+            }
+        }
+        return matrix[b.length][a.length];
+    }
+
+    /**
+     * 计算相似度 (0.0 - 1.0)
+     */
+    function getSimilarity(text, pattern) {
+        if (!text || !pattern) return 0;
         text = text.toLowerCase();
         pattern = pattern.toLowerCase();
         
-        let patternIdx = 0;
-        let textIdx = 0;
-        
-        // 双指针遍历
-        while (patternIdx < pattern.length && textIdx < text.length) {
-            // 如果当前字符匹配，pattern 指针后移
-            if (pattern[patternIdx] === text[textIdx]) {
-                patternIdx++;
-            }
-            // text 指针始终后移
-            textIdx++;
+        // 包含匹配直接给高分 (0.8 + 长度占比 * 0.2)
+        if (text.includes(pattern)) {
+            const boost = 0.8 + (pattern.length / Math.max(text.length, 1)) * 0.2;
+            return Math.min(1, boost);
         }
+
+        const distance = levenshtein(text, pattern);
+        const maxLength = Math.max(text.length, pattern.length);
+        if (maxLength === 0) return 1.0;
         
-        // 如果 pattern 指针走到了末尾，说明所有字符都按顺序找到了
-        return patternIdx === pattern.length;
+        const score = 1 - (distance / maxLength);
+        return Math.max(0, Math.min(1, score));
     }
 
-    // 挂载到全局对象，供其他模块调用
+    // 挂载到全局对象
     window.FuzzySearch = {
-        match: fuzzyMatch
+        similarity: getSimilarity
     };
 })();
