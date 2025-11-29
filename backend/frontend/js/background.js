@@ -8,11 +8,16 @@ class AntigravityBackground {
         this.canvas = document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d');
         this.particles = [];
-        this.particleCount = 60; 
+        this.particleCount = 64; // 减少粒子数量
         this.width = window.innerWidth;
         this.height = window.innerHeight;
         this.mouseX = -1000;
         this.mouseY = -1000;
+        this.isVisible = true;
+        this.animationId = null;
+        this.lastFrameTime = 0;
+        this.targetFPS = 60; // 限制帧率为 60fps
+        this.frameInterval = 1000 / this.targetFPS;
         
         this.init();
     }
@@ -37,6 +42,21 @@ class AntigravityBackground {
             this.mouseX = e.clientX;
             this.mouseY = e.clientY;
         });
+        
+        // 页面可见性检测 - 页面隐藏时暂停动画
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.isVisible = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            } else {
+                this.isVisible = true;
+                this.lastFrameTime = 0;
+                this.animate();
+            }
+        });
 
         this.createParticles();
         this.animate();
@@ -56,7 +76,17 @@ class AntigravityBackground {
         }
     }
 
-    animate() {
+    animate(currentTime = 0) {
+        if (!this.isVisible) return;
+        
+        // 帧率限制
+        const elapsed = currentTime - this.lastFrameTime;
+        if (elapsed < this.frameInterval) {
+            this.animationId = requestAnimationFrame((t) => this.animate(t));
+            return;
+        }
+        this.lastFrameTime = currentTime - (elapsed % this.frameInterval);
+        
         this.ctx.clearRect(0, 0, this.width, this.height);
         
         this.particles.forEach(p => {
@@ -64,7 +94,7 @@ class AntigravityBackground {
             p.draw(this.ctx);
         });
 
-        requestAnimationFrame(() => this.animate());
+        this.animationId = requestAnimationFrame((t) => this.animate(t));
     }
 }
 
