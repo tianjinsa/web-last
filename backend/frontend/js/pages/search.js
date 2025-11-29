@@ -1,4 +1,3 @@
-
 (function registerSearchPage() {
     const register = () => {
         if (!window.SPA || typeof window.SPA.registerPage !== 'function') {
@@ -24,7 +23,7 @@
             }),
             
             // 核心渲染逻辑
-            render: ({ root, articles = [], tags = [] }) => {
+            render: async ({ root, articles = [], tags = [] }) => {
                 if (!root) return;
                 
                 // 搜索状态管理
@@ -59,6 +58,9 @@
                                 </select>
                                 <button id="doc-fuzzy-toggle" class="search-select w-md-auto" style="flex: 0 0 auto;" title="开启/关闭模糊匹配">
                                     ✨ 模糊
+                                </button>
+                                <button id="ai-search-btn" class="search-select w-md-auto" style="flex: 0 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;" title="使用 AI 助手搜索">
+                                    🤖 AI 助手
                                 </button>
                             </div>
 
@@ -96,6 +98,164 @@
                 const categoryFilter = root.querySelector('#doc-category-filter');
                 const resultContainer = root.querySelector('#doc-search-results');
                 const resultHead = root.querySelector('#search-result-head');
+
+                // --- AI 助手逻辑 ---
+                const aiBtn = root.querySelector('#ai-search-btn');
+                
+                // 检查 AI 是否启用
+                let aiEnabled = false;
+                try {
+                    const aiConfigRes = await fetch('/api/ai/config');
+                    if (aiConfigRes.ok) {
+                        const aiConfig = await aiConfigRes.json();
+                        aiEnabled = aiConfig.enabled;
+                    }
+                } catch (e) {
+                    console.warn('Failed to check AI config:', e);
+                }
+                
+                // 如果 AI 未启用，隐藏按钮
+                if (!aiEnabled && aiBtn) {
+                    aiBtn.style.display = 'none';
+                }
+                
+                // 清理旧模态框
+                const oldAiModal = document.getElementById('ai-search-modal');
+                if (oldAiModal) oldAiModal.remove();
+
+                // 创建模态框
+                const aiModal = document.createElement('div');
+                aiModal.id = 'ai-search-modal';
+                aiModal.className = 'modal-overlay';
+                aiModal.style.display = 'none';
+                aiModal.innerHTML = `
+                    <div class="modal-content" style="max-width: 600px; width: 90%; height: 80vh; display: flex; flex-direction: column; background: var(--bg-panel, #fff); color: var(--text-main, #333);">
+                        <div class="modal-header" style="padding: 1rem; border-bottom: 1px solid var(--border-medium, #eee); display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="margin: 0;">🤖 AI 智能助手</h3>
+                            <button type="button" class="close-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: inherit;">×</button>
+                        </div>
+                        <div class="modal-body" id="ai-chat-history" style="flex: 1; overflow-y: auto; padding: 1rem; background: rgba(0,0,0,0.02);">
+                            <div class="ai-message system">
+                                <p>你好！我是你的文档助手。你可以问我关于文档库的任何问题。</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="padding: 1rem; border-top: 1px solid var(--border-medium, #eee);">
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="ai-input" placeholder="输入你的问题..." style="flex: 1; padding: 0.6rem; border-radius: 4px; border: 1px solid var(--border-medium, #ccc); background: var(--bg-input, #fff); color: var(--text-main, #333);">
+                                <button id="ai-send-btn" class="primary-btn" style="padding: 0.5rem 1.2rem; white-space: nowrap;">发送</button>
+                            </div>
+                        </div>
+                    </div>
+                    <style>
+                        #ai-search-modal { z-index: 2000; }
+                        .ai-message { margin-bottom: 1rem; padding: 0.8rem; border-radius: 8px; max-width: 85%; line-height: 1.5; word-wrap: break-word; }
+                        .ai-message.system { background: var(--bg-card, #f5f5f5); align-self: flex-start; margin-right: auto; border: 1px solid var(--border-medium, #eee); }
+                        .ai-message.user { background: var(--accent, #667eea); color: white; align-self: flex-end; margin-left: auto; }
+                        .ai-message.loading { opacity: 0.7; font-style: italic; }
+                        .ai-message p { margin: 0 0 0.5rem 0; }
+                        .ai-message p:last-child { margin: 0; }
+                        #ai-chat-history { display: flex; flex-direction: column; }
+                    </style>
+                `;
+                document.body.appendChild(aiModal);
+
+                // 事件监听
+                const closeAiModal = () => {
+                    aiModal.style.display = 'none';
+                };
+                
+                aiModal.querySelector('.close-modal').addEventListener('click', closeAiModal);
+                aiModal.addEventListener('click', (e) => {
+                    if (e.target === aiModal) closeAiModal();
+                });
+
+                if (aiBtn) {
+                    aiBtn.addEventListener('click', () => {
+                        aiModal.style.display = 'flex';
+                        setTimeout(() => aiModal.querySelector('#ai-input').focus(), 100);
+                    });
+                }
+
+                const chatHistory = aiModal.querySelector('#ai-chat-history');
+                const aiInput = aiModal.querySelector('#ai-input');
+                const aiSendBtn = aiModal.querySelector('#ai-send-btn');
+
+                const appendMessage = (role, text) => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = `ai-message ${role}`;
+                    // 使用 marked 解析 markdown，如果不可用则直接显示文本
+                    msgDiv.innerHTML = window.marked ? window.marked.parse(text) : `<p>${text}</p>`;
+                    chatHistory.appendChild(msgDiv);
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                };
+
+                const handleSend = async () => {
+                    const query = aiInput.value.trim();
+                    if (!query) return;
+
+                    appendMessage('user', query);
+                    aiInput.value = '';
+                    aiInput.disabled = true;
+                    aiSendBtn.disabled = true;
+                    aiSendBtn.textContent = '...';
+
+                    const loadingMsg = document.createElement('div');
+                    loadingMsg.className = 'ai-message system loading';
+                    loadingMsg.textContent = '思考中...';
+                    chatHistory.appendChild(loadingMsg);
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+
+                    try {
+                        // 准备上下文数据 (精简字段以节省 token)
+                        const contextData = articles.map(a => ({
+                            title: a.title,
+                            desc: a.description,
+                            tags: a.tags,
+                            cat: a.category,
+                            slug: a.slug
+                        }));
+
+                        const response = await fetch('/api/ai/chat', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: query,
+                                context: contextData
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errData = await response.json().catch(() => ({}));
+                            throw new Error(errData.error || `API Error: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        chatHistory.removeChild(loadingMsg);
+                        
+                        if (data.content) {
+                            appendMessage('system', data.content);
+                        } else {
+                            appendMessage('system', '抱歉，我没有理解你的问题，或者服务暂时不可用。');
+                        }
+
+                    } catch (error) {
+                        if (loadingMsg.parentNode) chatHistory.removeChild(loadingMsg);
+                        appendMessage('system', `发生错误: ${error.message}`);
+                        console.error('AI Search Error:', error);
+                    } finally {
+                        aiInput.disabled = false;
+                        aiSendBtn.disabled = false;
+                        aiSendBtn.textContent = '发送';
+                        aiInput.focus();
+                    }
+                };
+
+                aiSendBtn.addEventListener('click', handleSend);
+                aiInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleSend();
+                });
 
                 const syncFilterChips = (container, selectedSet, attr) => {
                     if (!container) return;

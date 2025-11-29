@@ -27,6 +27,21 @@
             "description": "从环222境准备到部署的全流程后端最佳实践。",
             "date": "2023-10-22"
         }
+        ,
+        {
+            "slug": "main",
+            "title": "网站设计文档",
+            "path": "articles/DESIGN_SYSTEM.md",
+            "category": "文档",
+            "tags": [
+                "设计",
+                "py后端",
+                "Flask"
+            ],
+            "description": "网站设计文档",
+            "date": "2024-10-22"
+        }
+        
     ],
     "html": [
         {
@@ -72,6 +87,28 @@
         {
             "slug": "zzc",
             "title": "赵紫超课设",
+            "path": "https://matehub.top/",
+            "category": "赵紫超",
+            "tags": [
+                "课设"
+            ],
+            "description": "赵紫超的课程设计项目网站。",
+            "date": "2025-11-22"
+        },
+        {
+            "slug": "zzc3",
+            "title": "赵紫超课设cdn",
+            "path": "https://zzc.tianjinsa.top/",
+            "category": "赵紫超",
+            "tags": [
+                "课设"
+            ],
+            "description": "赵紫超的课程设计项目网站。",
+            "date": "2025-11-22"
+        },
+        {
+            "slug": "zzc2",
+            "title": "赵紫超课设http",
             "path": "http://matehub.top/",
             "category": "赵紫超",
             "tags": [

@@ -2,9 +2,12 @@ from asyncio.log import logger
 from logging import log
 import os
 import html
+import re
 from datetime import datetime, date, timedelta
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin, quote
 from urllib.request import Request, urlopen
+import urllib.error
+import json
 from flask import Flask, request, jsonify, render_template, redirect, send_from_directory, abort
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
@@ -56,6 +59,17 @@ with app.app_context():
         SystemConfig.set('auto_approve_users', 'false')
     if not SystemConfig.query.filter_by(key='auto_approve_comments').first():
         SystemConfig.set('auto_approve_comments', 'false')
+    # AI 助手配置
+    if not SystemConfig.query.filter_by(key='ai_enabled').first():
+        SystemConfig.set('ai_enabled', 'true')
+    if not SystemConfig.query.filter_by(key='ai_api_url').first():
+        SystemConfig.set('ai_api_url', 'https://open.bigmodel.cn/api/paas/v4/chat/completions')
+    if not SystemConfig.query.filter_by(key='ai_api_key').first():
+        SystemConfig.set('ai_api_key', '')
+    if not SystemConfig.query.filter_by(key='ai_model').first():
+        SystemConfig.set('ai_model', 'glm-4.5-flash')
+    if not SystemConfig.query.filter_by(key='ai_system_prompt').first():
+        SystemConfig.set('ai_system_prompt', '你是一个智能文档助手。请根据提供的文档列表回答用户的问题。回答请使用 Markdown 格式，保持简洁明了。')
 
 
 # ==========================================
@@ -468,9 +482,91 @@ def get_top_articles():
     return jsonify(result)
 
 
-@app.route('/api/ifm-proxy')
+PROXY_URL_PATTERN = re.compile(r'(src|href|action)=("|\")(.*?)(\2)', re.IGNORECASE)
+CSS_URL_PATTERN = re.compile(r'url\(([^)]+)\)', re.IGNORECASE)
+CSS_IMPORT_PATTERN = re.compile(r'@import\s+(?:url\()?(["\']?[^\s"\')]+["\']?)\)?', re.IGNORECASE)
+
+
+def build_proxy_url(target_url: str) -> str:
+    return f"/api/ifm-proxy?target={quote(target_url, safe='')}"
+
+
+def rewrite_url_for_proxy(raw_url: str, base_url: str) -> str:
+    if not raw_url:
+        return raw_url
+
+    trimmed = raw_url.strip()
+    lower = trimmed.lower()
+
+    if trimmed.startswith('#') or lower.startswith('javascript:') or lower.startswith('data:'):
+        return trimmed
+
+    if trimmed.startswith('/api/ifm-proxy?target='):
+        return trimmed
+
+    if trimmed.startswith('//'):
+        base_scheme = urlparse(base_url).scheme or 'http'
+        absolute = f"{base_scheme}:{trimmed}"
+    elif lower.startswith('http://') or lower.startswith('https://'):
+        absolute = trimmed
+    else:
+        absolute = urljoin(base_url, trimmed)
+
+    if absolute.lower().startswith('https://'):
+        return absolute
+
+    return build_proxy_url(absolute)
+
+
+def rewrite_html_for_proxy(html_text: str, base_url: str) -> str:
+    def replace_attr(match):
+        attr = match.group(1)
+        quote_char = match.group(2)
+        value = match.group(3)
+        new_value = rewrite_url_for_proxy(value, base_url)
+        return f"{attr}={quote_char}{new_value}{quote_char}"
+
+    return PROXY_URL_PATTERN.sub(replace_attr, html_text)
+
+
+def _wrap_css_url(new_url: str, original_token: str) -> str:
+    stripped = original_token.strip()
+    if stripped.startswith(('"', "'")) and stripped[-1:] == stripped[:1]:
+        quote_char = stripped[0]
+        return f"{quote_char}{new_url}{quote_char}"
+    return new_url
+
+
+def rewrite_css_for_proxy(css_text: str, base_url: str) -> str:
+    def replace_url(match):
+        token = match.group(1)
+        cleaned = token.strip().strip('"\'')
+        lowered = cleaned.lower()
+        if not cleaned or lowered.startswith('data:') or lowered.startswith('javascript:'):
+            return match.group(0)
+        new_value = rewrite_url_for_proxy(cleaned, base_url)
+        wrapped = _wrap_css_url(new_value, token)
+        return f"url({wrapped})"
+
+    def replace_import(match):
+        token = match.group(1)
+        stripped = token.strip()
+        cleaned = stripped.strip('"\'')
+        lowered = cleaned.lower()
+        if not cleaned or lowered.startswith('data:') or lowered.startswith('javascript:'):
+            return match.group(0)
+        new_value = rewrite_url_for_proxy(cleaned, base_url)
+        wrapped = _wrap_css_url(new_value, stripped)
+        return f"@import url({wrapped})"
+
+    css_text = CSS_URL_PATTERN.sub(replace_url, css_text)
+    css_text = CSS_IMPORT_PATTERN.sub(replace_import, css_text)
+    return css_text
+
+
+@app.route('/api/ifm-proxy', methods=['GET', 'POST'])
 def ifm_proxy():
-    """将 http/https 资源通过服务器代理，以便在 HTTPS 页面中安全嵌入。"""
+    """将 http/https 资源通过服务器代理，并重写其中的 http 引用，避免 HTTPS Mixed-Content。"""
     target = request.args.get('target')
     if not target:
         return jsonify({'error': 'target_required'}), 400
@@ -480,12 +576,19 @@ def ifm_proxy():
         return jsonify({'error': 'invalid_scheme'}), 400
 
     try:
-        req = Request(target, headers={'User-Agent': 'AlphaDocsProxy/1.0'})
+        method = request.method.upper()
+        body = request.get_data() if method == 'POST' else None
+        headers = {'User-Agent': 'AlphaDocsProxy/1.0'}
+        if method == 'POST' and request.content_type:
+            headers['Content-Type'] = request.content_type
+
+        req = Request(target, data=body, headers=headers, method=method)
         with urlopen(req, timeout=8) as remote:
             content = remote.read()
             content_type = remote.headers.get('Content-Type', 'text/html; charset=utf-8')
+            content_type_lower = content_type.lower()
 
-            if 'text/html' in content_type.lower():
+            if 'text/html' in content_type_lower:
                 charset = remote.headers.get_content_charset() or 'utf-8'
                 text = content.decode(charset, errors='replace')
                 escaped_target = html.escape(target, quote=True)
@@ -501,12 +604,20 @@ def ifm_proxy():
                             text = base_tag + text
                     else:
                         text = base_tag + text
+                text = rewrite_html_for_proxy(text, target)
                 content = text.encode('utf-8')
                 content_type = 'text/html; charset=utf-8'
+            elif 'text/css' in content_type_lower:
+                charset = remote.headers.get_content_charset() or 'utf-8'
+                text = content.decode(charset, errors='replace')
+                text = rewrite_css_for_proxy(text, target)
+                content = text.encode('utf-8')
+                content_type = 'text/css; charset=utf-8'
 
             response = app.response_class(content, content_type=content_type)
             response.headers['Cache-Control'] = 'public, max-age=60'
             response.headers['X-IFM-Proxy'] = '1'
+            response.headers['X-Content-Source'] = target
             return response
     except Exception as exc:
         return jsonify({'error': 'proxy_failed', 'detail': str(exc)}), 502
@@ -650,7 +761,12 @@ def get_config():
     """获取系统配置"""
     return jsonify({
         'auto_approve_users': SystemConfig.get('auto_approve_users') == 'true',
-        'auto_approve_comments': SystemConfig.get('auto_approve_comments') == 'true'
+        'auto_approve_comments': SystemConfig.get('auto_approve_comments') == 'true',
+        'ai_enabled': SystemConfig.get('ai_enabled') == 'true',
+        'ai_api_url': SystemConfig.get('ai_api_url') or '',
+        'ai_api_key': SystemConfig.get('ai_api_key') or '',
+        'ai_model': SystemConfig.get('ai_model') or 'glm-4.5-flash',
+        'ai_system_prompt': SystemConfig.get('ai_system_prompt') or ''
     }), 200
 
 @app.route('/api/admin/config', methods=['PUT'])
@@ -665,7 +781,97 @@ def update_config():
     if 'auto_approve_comments' in data:
         SystemConfig.set('auto_approve_comments', 'true' if data['auto_approve_comments'] else 'false')
     
+    # AI 配置
+    if 'ai_enabled' in data:
+        SystemConfig.set('ai_enabled', 'true' if data['ai_enabled'] else 'false')
+    if 'ai_api_url' in data:
+        SystemConfig.set('ai_api_url', data['ai_api_url'])
+    if 'ai_api_key' in data:
+        SystemConfig.set('ai_api_key', data['ai_api_key'])
+    if 'ai_model' in data:
+        SystemConfig.set('ai_model', data['ai_model'])
+    if 'ai_system_prompt' in data:
+        SystemConfig.set('ai_system_prompt', data['ai_system_prompt'])
+    
     return jsonify({'message': 'Config updated'}), 200
+
+
+# ==========================================
+# API: AI 助手
+# ==========================================
+
+@app.route('/api/ai/config', methods=['GET'])
+def get_ai_public_config():
+    """获取 AI 公开配置（不含敏感信息）"""
+    return jsonify({
+        'enabled': SystemConfig.get('ai_enabled') == 'true'
+    }), 200
+
+
+@app.route('/api/ai/chat', methods=['POST'])
+def ai_chat_proxy():
+    """AI 聊天代理接口"""
+    # 检查是否启用
+    if SystemConfig.get('ai_enabled') != 'true':
+        return jsonify({'error': 'AI assistant is disabled'}), 403
+    
+    api_url = SystemConfig.get('ai_api_url')
+    api_key = SystemConfig.get('ai_api_key')
+    model = SystemConfig.get('ai_model') or 'glm-4.5-flash'
+    system_prompt = SystemConfig.get('ai_system_prompt') or '你是一个智能文档助手。'
+    
+    if not api_url or not api_key:
+        return jsonify({'error': 'AI not configured'}), 503
+    
+    data = request.json
+    user_message = data.get('message', '')
+    context = data.get('context', [])
+    
+    if not user_message:
+        return jsonify({'error': 'Message required'}), 400
+    
+    # 构建完整的 system prompt，包含文档上下文
+    full_system_prompt = system_prompt
+    if context:
+        full_system_prompt += f"\n\n文档列表: {json.dumps(context, ensure_ascii=False)}"
+        full_system_prompt += "\n\n请注意：如果用户询问某篇文档，请提供文档的标题和链接（链接格式为 /docs/{slug}）。"
+    
+    try:
+        import urllib.request
+        import json as json_lib
+        
+        payload = json_lib.dumps({
+            'model': model,
+            'messages': [
+                {'role': 'system', 'content': full_system_prompt},
+                {'role': 'user', 'content': user_message}
+            ]
+        }).encode('utf-8')
+        
+        req = urllib.request.Request(
+            api_url,
+            data=payload,
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {api_key}'
+            },
+            method='POST'
+        )
+        
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            result = json_lib.loads(resp.read().decode('utf-8'))
+            
+            if result.get('choices') and len(result['choices']) > 0:
+                return jsonify({
+                    'content': result['choices'][0]['message']['content']
+                }), 200
+            else:
+                return jsonify({'error': 'Empty response from AI'}), 502
+                
+    except urllib.error.HTTPError as e:
+        return jsonify({'error': f'AI API error: {e.code}'}), 502
+    except Exception as e:
+        return jsonify({'error': f'AI request failed: {str(e)}'}), 502
 
 # ==========================================
 # SPA 路由捕获

@@ -132,12 +132,12 @@ class Particle {
 
 // Initialize when DOM is ready
 function initBackground() {
-    // Check if reduced motion is preferred
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (!mediaQuery.matches) {
+    // 强制开启粒子动画，忽略系统的“减弱动态效果”设置
+    // const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // if (!mediaQuery.matches) {
         console.log('[Background] Initializing particle system...');
         new AntigravityBackground();
-    }
+    // }
 }
 
 if (document.readyState === 'loading') {

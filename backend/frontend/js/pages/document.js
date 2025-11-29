@@ -149,9 +149,9 @@
                                 proxied = true;
                             }
 
-                            const sandboxPermissions = proxied
-                                ? 'allow-scripts allow-forms allow-pointer-lock allow-downloads'
-                                : 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads';
+                            // 即使是代理内容，为了支持 localStorage 也需要 allow-same-origin
+                            // 注意：这会使代理内容拥有与主站相同的 Origin
+                            const sandboxPermissions = 'allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-downloads allow-popups';
 
                             target.innerHTML = `
                                 <div class="ifm-wrapper">

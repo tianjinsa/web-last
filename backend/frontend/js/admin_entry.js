@@ -133,6 +133,7 @@ const AdminApp = {
                 <div class="admin-tabs">
                     <button class="admin-tab active" data-tab="users">用户管理</button>
                     <button class="admin-tab" data-tab="comments">评论审核</button>
+                    <button class="admin-tab" data-tab="ai">AI 助手</button>
                     <button class="admin-tab" data-tab="settings">系统设置</button>
                 </div>
                 
@@ -156,6 +157,38 @@ const AdminApp = {
                         </div>
                         <div id="comments-list" class="table-container">
                             <p>加载中...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- AI 助手设置 -->
+                    <div class="admin-section hidden" id="admin-ai">
+                        <h2>AI 助手设置</h2>
+                        <p class="text-muted mb-4">配置 AI 搜索助手的 API 参数，使用 OpenAI 兼容格式。</p>
+                        <div class="settings-form mt-4" style="max-width: 700px;">
+                            <div class="form-check form-switch mb-4">
+                                <input class="form-check-input" type="checkbox" id="ai-enabled">
+                                <label class="form-check-label" for="ai-enabled">启用 AI 助手</label>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">API 地址</label>
+                                <input type="text" id="ai-api-url" class="form-control" placeholder="https://open.bigmodel.cn/api/paas/v4/chat/completions">
+                                <small class="text-muted">OpenAI 兼容的 Chat Completions 接口地址</small>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">API Key</label>
+                                <input type="password" id="ai-api-key" class="form-control" placeholder="sk-xxx 或其他格式的密钥">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">模型 ID</label>
+                                <input type="text" id="ai-model" class="form-control" placeholder="glm-4.5-flash">
+                            </div>
+                            <div class="form-group mb-4">
+                                <label class="form-label">系统提示词 (System Prompt)</label>
+                                <textarea id="ai-system-prompt" class="form-control" rows="4" placeholder="你是一个智能文档助手..."></textarea>
+                                <small class="text-muted">文档列表会自动附加到系统提示词后面</small>
+                            </div>
+                            <button id="save-ai-settings" class="btn btn-primary">保存 AI 设置</button>
+                            <div id="ai-settings-message" class="mt-2"></div>
                         </div>
                     </div>
                     
@@ -197,6 +230,7 @@ const AdminApp = {
                 
                 if (targetTab === 'users') this.loadUsers();
                 else if (targetTab === 'comments') this.loadPendingComments();
+                else if (targetTab === 'ai') this.loadAISettings();
                 else if (targetTab === 'settings') this.loadSettings();
             });
         });
@@ -205,6 +239,12 @@ const AdminApp = {
         const saveBtn = document.getElementById('save-settings');
         if (saveBtn) {
             saveBtn.addEventListener('click', () => this.saveSettings());
+        }
+        
+        // AI 设置保存
+        const saveAiBtn = document.getElementById('save-ai-settings');
+        if (saveAiBtn) {
+            saveAiBtn.addEventListener('click', () => this.saveAISettings());
         }
     },
 
@@ -337,6 +377,48 @@ const AdminApp = {
         const config = await response.json();
         document.getElementById('auto-approve-users').checked = config.auto_approve_users;
         document.getElementById('auto-approve-comments').checked = config.auto_approve_comments;
+    },
+
+    async loadAISettings() {
+        const response = await this.fetchApi('/api/admin/config');
+        if (!response || !response.ok) return;
+        
+        const config = await response.json();
+        document.getElementById('ai-enabled').checked = config.ai_enabled;
+        document.getElementById('ai-api-url').value = config.ai_api_url || '';
+        document.getElementById('ai-api-key').value = config.ai_api_key || '';
+        document.getElementById('ai-model').value = config.ai_model || '';
+        document.getElementById('ai-system-prompt').value = config.ai_system_prompt || '';
+    },
+
+    async saveAISettings() {
+        const btn = document.getElementById('save-ai-settings');
+        const msg = document.getElementById('ai-settings-message');
+        
+        btn.disabled = true;
+        
+        const response = await this.fetchApi('/api/admin/config', {
+            method: 'PUT',
+            body: JSON.stringify({
+                ai_enabled: document.getElementById('ai-enabled').checked,
+                ai_api_url: document.getElementById('ai-api-url').value.trim(),
+                ai_api_key: document.getElementById('ai-api-key').value.trim(),
+                ai_model: document.getElementById('ai-model').value.trim(),
+                ai_system_prompt: document.getElementById('ai-system-prompt').value.trim()
+            })
+        });
+        
+        btn.disabled = false;
+        
+        if (response && response.ok) {
+            msg.textContent = 'AI 设置已保存';
+            msg.className = 'text-success mt-2';
+        } else {
+            msg.textContent = '保存失败';
+            msg.className = 'text-danger mt-2';
+        }
+        
+        setTimeout(() => msg.textContent = '', 3000);
     },
 
     async saveSettings() {
