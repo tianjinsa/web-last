@@ -1,0 +1,3 @@
+使用cdn时需设置环境变量CDN_URL，比如CDN_URL= https://www.emp.com/root
+*-map.json中的配置的路径都以https://www.emp.com/root 为根路径
+并且json文件应该位于https://www.emp.com/root/*-map.json

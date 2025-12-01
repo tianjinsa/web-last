@@ -1,0 +1,353 @@
+/**
+ * 卡片组 - 搜索界面
+ * 现代化双栏卡片设计，带流畅动画
+ * 支持手风琴效果（需要 cards.js）
+ */
+
+/* ========================================
+   卡片组容器
+   ======================================== */
+.cardgroup {
+    /* 手风琴效果配置 */
+    --hover-act: ; /* 卡片被悬停时的变换效果 */
+    --unhover-act: ; /* 卡片未被悬停时的变换效果 */
+    --card-gap: 10px; /* 卡片之间的间距 */
+    
+    display: flex;
+    gap: 0; /* 使用 --card-gap 控制间距 */
+    max-width: var(--site-width);
+    margin: 0 auto var(--spacing-xl);
+    height: 600px;
+    animation: fadeInUp var(--transition-slow);
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+/* ========================================
+   卡片主体
+   ======================================== */
+.card-t {
+    display: flex;
+    flex-direction: row;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    /* overflow-x: hidden; */
+    backdrop-filter: blur(var(--blur-amount));
+    -webkit-backdrop-filter: blur(var(--blur-amount));
+    transition: transform var(--transition-base), border-color var(--transition-base);
+    min-height: 600px;
+    position: relative;
+    flex-shrink: 0; /* 防止被压缩 */
+    
+    /* 手风琴效果变量 */
+    --base-x: 0px;
+    --offset-x: 0px;
+    width: fit-content !important;
+    height: 100% !important;
+    will-change: transform;
+    transform: translate3d(calc(var(--base-x) + var(--offset-x)), 0, 0) var(--unhover-act) !important;
+}
+
+.card-t::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-lg);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--transition-base);
+}
+
+.card-t:hover::before {
+    opacity: 0.15;
+}
+
+.card-t:hover {
+    border-color: var(--border-medium);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+}
+
+/* ========================================
+   卡片头部（侧边栏）
+   ======================================== */
+.cardhead {
+    width: 60px;
+    background: var(--bg-panel-strong);
+    border-right: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    overflow: hidden;
+    padding: var(--spacing-xl) var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    transition: all var(--transition-base);
+    flex-shrink: 0;
+    position: relative;
+}
+
+.cardhead::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 0;
+    background: var(--gradient-primary);
+    transition: height var(--transition-slow);
+}
+
+.card-t:hover .cardhead::before {
+    height: 100%;
+}
+
+.card-t:hover .cardhead {
+    color: var(--accent-strong);
+}
+
+/* 计数显示 */
+.count-display {
+    margin-top: var(--spacing-lg);
+    font-family: 'Segoe UI Mono', 'SF Mono', 'Consolas', monospace;
+    font-size: 0.875rem;
+    opacity: 0.8;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-xs);
+    text-orientation: upright;
+}
+
+.count-num {
+    text-combine-upright: all;
+    -webkit-text-combine: horizontal;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.count-divider {
+    opacity: 0.5;
+}
+
+/* ========================================
+   卡片内容区
+   ======================================== */
+.cardbody {
+    flex-shrink: 0; /* 防止被压缩 */
+    padding: var(--spacing-xl);
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    overflow-x: hidden;
+    background: transparent;
+}
+
+/* 美化滚动条 */
+.cardbody::-webkit-scrollbar {
+    width: 8px;
+}
+
+.cardbody::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.cardbody::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-base);
+}
+
+.cardbody::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+}
+
+/* ========================================
+   搜索选项区 - 使用 Bootstrap flex 类控制布局
+   ======================================== */
+.search-options {
+    gap: var(--spacing-sm);
+}
+
+.search-select {
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--input-bg);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    appearance: none;
+    -webkit-appearance: none;
+    min-width: 0; /* 防止 flex 布局溢出 */
+}
+
+select.search-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236e7a94' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--spacing-md) center;
+    background-size: 14px;
+    padding-right: calc(var(--spacing-md) * 2.5);
+}
+
+.search-select:hover,
+.search-select:focus {
+    background-color: var(--bg-elevated);
+    border-color: var(--accent);
+    outline: none;
+}
+
+.search-select option {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    padding: var(--spacing-sm);
+}
+
+button.search-select {
+    background-image: none;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    flex: 0 0 auto;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    background-color: var(--bg-elevated); /* 明确背景色 */
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+button.search-select:hover {
+    background-color: var(--bg-hover);
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+button.search-select.is-active {
+    background: linear-gradient(135deg, rgba(123, 108, 255, 0.15), rgba(54, 233, 246, 0.15));
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* ========================================
+   文档列表
+   ======================================== */
+.doc-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.doc-list .doc-card {
+    opacity: 0;
+    animation: slideInRight 0.4s ease forwards;
+}
+
+.doc-list .doc-card:nth-child(1) { animation-delay: 0.05s; }
+.doc-list .doc-card:nth-child(2) { animation-delay: 0.1s; }
+.doc-list .doc-card:nth-child(3) { animation-delay: 0.15s; }
+.doc-list .doc-card:nth-child(4) { animation-delay: 0.2s; }
+.doc-list .doc-card:nth-child(5) { animation-delay: 0.25s; }
+.doc-list .doc-card:nth-child(n+6) { animation-delay: 0.3s; }
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ========================================
+   搜索面板特定宽度控制
+   ======================================== */
+.search-input-panel {
+    width: 400px;
+}
+
+#doc-search-results {
+    width: 500px;
+}
+
+/* ========================================
+   响应式设计 - 使用 Bootstrap 类控制
+   ======================================== */
+/* 
+  说明：响应式布局通过在 HTML 中添加 Bootstrap 类来实现：
+  - 使用 .flex-column .flex-lg-row 控制方向
+  - 使用 .d-none .d-md-block 控制显示/隐藏
+  - 使用 .w-100 .w-md-auto 控制宽度
+  
+  如果需要特定的样式调整，可以添加自定义类而不是媒体查询
+*/
+
+/* 移动端卡片组调整 */
+@media (max-width: 768px) {
+    .cardgroup {
+        flex-direction: column;
+        align-items: stretch;
+        height: auto;
+        max-width: var(--site-width);
+        border-radius: var(--radius-md);
+    }
+
+    .card-t {
+        width: 100% !important;
+        min-height: auto;
+        height: auto !important;
+        transform: none !important;
+        display: block;
+        margin-bottom: var(--spacing-md);
+        border-radius: var(--radius-md);
+    }
+
+    /* 隐藏竖向侧头，改为在内容中显示标题/计数 */
+    .cardhead {
+        display: none;
+    }
+
+    .cardbody {
+        padding: var(--spacing-md);
+        height: auto;
+        overflow: visible;
+    }
+
+    .search-options {
+        flex-direction: column;
+    }
+
+    /* 搜索按钮与选择器更紧凑 */
+    .search-select,
+    button.search-select {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.95rem;
+    }
+
+    /* 搜索面板宽度在移动端自适应 */
+    .search-input-panel,
+    #doc-search-results {
+        width: 100% !important;
+    }
+}

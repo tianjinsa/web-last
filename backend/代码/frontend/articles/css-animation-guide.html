@@ -1,0 +1,160 @@
+<style>
+    .anim-demo-box {
+        width: 60px;
+        height: 60px;
+        background: var(--accent, #7b6cff);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.8rem;
+        margin: 20px auto;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .anim-container {
+        border: 1px solid var(--border-color, #ddd);
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        background: var(--bg-card, #fff);
+        overflow: hidden;
+        text-align: center;
+    }
+
+    /* 示例 1: 基础移动 */
+    @keyframes slide-right {
+        from { transform: translateX(-50px); }
+        to { transform: translateX(50px); }
+    }
+    .anim-slide {
+        animation: slide-right 2s infinite alternate ease-in-out;
+    }
+
+    /* 示例 2: 颜色变化 */
+    @keyframes color-change {
+        0% { background: #7b6cff; transform: scale(1); }
+        50% { background: #ff6c6c; transform: scale(1.2); }
+        100% { background: #7b6cff; transform: scale(1); }
+    }
+    .anim-pulse {
+        animation: color-change 2s infinite;
+    }
+
+    /* 示例 3: 旋转加载 */
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    .anim-spin {
+        width: 40px;
+        height: 40px;
+        background: transparent;
+        border: 4px solid #ddd;
+        border-top-color: var(--accent, #7b6cff);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        box-shadow: none;
+    }
+
+    /* 示例 4: 弹跳 */
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-40px); }
+    }
+    .anim-bounce {
+        animation: bounce 1s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+    }
+    
+    .code-snippet {
+        background: #f4f4f4;
+        padding: 10px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        margin-top: 10px;
+        white-space: pre-wrap;
+        text-align: left;
+        color: #333;
+    }
+    [data-theme="dark"] .code-snippet {
+        background: #2d2d2d;
+        color: #eee;
+    }
+</style>
+
+<p>CSS 动画 (Animations) 允许元素从一种样式逐渐变化为另一种样式。与 <code>transition</code> 不同，<code>animation</code> 可以控制多个步骤、循环播放以及更复杂的运动曲线。</p>
+
+<h3>1. 基础动画 (@keyframes)</h3>
+<p>使用 <code>@keyframes</code> 定义动画序列，然后通过 <code>animation</code> 属性应用它。</p>
+<div class="anim-container">
+    <div class="anim-demo-box anim-slide">Slide</div>
+    <div class="code-snippet">
+@keyframes slide-right {
+  from { transform: translateX(-50px); }
+  to { transform: translateX(50px); }
+}
+.box {
+  /* 动画名称 时长 循环次数 方向 */
+  animation: slide-right 2s infinite alternate;
+}
+    </div>
+</div>
+
+<h3>2. 多阶段关键帧</h3>
+<p>使用百分比来精确控制动画的中间状态。</p>
+<div class="anim-container">
+    <div class="anim-demo-box anim-pulse">Pulse</div>
+    <div class="code-snippet">
+@keyframes color-change {
+  0% { background: #7b6cff; transform: scale(1); }
+  50% { background: #ff6c6c; transform: scale(1.2); }
+  100% { background: #7b6cff; transform: scale(1); }
+}
+    </div>
+</div>
+
+<h3>3. 加载动画 (Infinite Loop)</h3>
+<p>结合 <code>rotate</code> 和 <code>linear</code> 线性时间函数制作加载圈。</p>
+<div class="anim-container">
+    <div class="anim-demo-box anim-spin"></div>
+    <div class="code-snippet">
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loader {
+  border: 4px solid #ddd;
+  border-top-color: #7b6cff;
+  border-radius: 50%;
+  /* 线性速度，无限循环 */
+  animation: spin 1s linear infinite;
+}
+    </div>
+</div>
+
+<h3>4. 缓动函数 (Timing Function)</h3>
+<p>使用 <code>cubic-bezier</code> 可以制作更有物理质感的弹跳效果。</p>
+<div class="anim-container">
+    <div class="anim-demo-box anim-bounce">Bounce</div>
+    <div class="code-snippet">
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-40px); }
+}
+.ball {
+  animation: bounce 1s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+}
+    </div>
+</div>
+
+<h3>常用属性速查</h3>
+<ul>
+    <li><strong>animation-name</strong>: @keyframes 的名称</li>
+    <li><strong>animation-duration</strong>: 动画完成一个周期所需时间 (如 2s)</li>
+    <li><strong>animation-timing-function</strong>: 速度曲线 (linear, ease, ease-in-out, cubic-bezier)</li>
+    <li><strong>animation-delay</strong>: 动画开始前的延迟</li>
+    <li><strong>animation-iteration-count</strong>: 播放次数 (数字 或 infinite)</li>
+    <li><strong>animation-direction</strong>: 播放方向 (normal, reverse, alternate)</li>
+    <li><strong>animation-fill-mode</strong>: 动画结束后元素的样式状态 (forwards, backwards, both)</li>
+</ul>

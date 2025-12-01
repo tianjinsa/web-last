@@ -1,0 +1,147 @@
+<style>
+    .demo-box {
+        width: 100px;
+        height: 100px;
+        background: var(--accent, #7b6cff);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px;
+        transition: transform 0.5s ease;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        font-size: 0.8rem;
+        text-align: center;
+    }
+    .demo-container {
+        border: 1px dashed var(--border-color, #ddd);
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: center;
+        justify-content: space-around;
+    }
+    .code-block {
+        background: #f5f5f5;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-family: monospace;
+        margin-top: 10px;
+        font-size: 0.85rem;
+        color: #333;
+    }
+    [data-theme="dark"] .code-block {
+        background: #2d2d2d;
+        color: #eee;
+    }
+    .demo-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+</style>
+
+<p>CSS <code>transform</code> 属性允许你旋转，缩放，倾斜或平移给定元素。这是现代 Web 动画和布局的核心属性之一。本文将通过可视化示例介绍各个参数的作用。</p>
+
+<h3>1. Translate (平移)</h3>
+<p><code>translate()</code> 方法从其当前位置移动元素（根据 X 轴和 Y 轴参数）。它不会影响文档流中的其他元素。</p>
+<div class="demo-container">
+    <div class="demo-item">
+        <div class="demo-box" style="transform: translateX(20px);">X+20px</div>
+        <div class="code-block">translateX(20px)</div>
+    </div>
+    <div class="demo-item">
+        <div class="demo-box" style="transform: translateY(-10px);">Y-10px</div>
+        <div class="code-block">translateY(-10px)</div>
+    </div>
+    <div class="demo-item">
+        <div class="demo-box" style="transform: translate(20px, 20px);">X+20, Y+20</div>
+        <div class="code-block">translate(20px, 20px)</div>
+    </div>
+</div>
+
+<h3>2. Rotate (旋转)</h3>
+<p><code>rotate()</code> 方法在一个给定的度数内旋转元素。正值是顺时针旋转，负值是逆时针旋转。</p>
+<div class="demo-container">
+    <div class="demo-item">
+        <div class="demo-box" style="transform: rotate(45deg);">45deg</div>
+        <div class="code-block">rotate(45deg)</div>
+    </div>
+    <div class="demo-item">
+        <div class="demo-box" style="transform: rotate(-90deg);">-90deg</div>
+        <div class="code-block">rotate(-90deg)</div>
+    </div>
+    <div class="demo-item">
+        <div class="demo-box" style="transform: rotate(180deg);">180deg</div>
+        <div class="code-block">rotate(180deg)</div>
+    </div>
+</div>
+
+<h3>3. Scale (缩放)</h3>
+<p><code>scale()</code> 方法增加或减少元素的大小（根据给定的宽度和高度参数）。值大于 1 为放大，0-1 之间为缩小。</p>
+<div class="demo-container">
+    <div class="demo-item">
+        <div class="demo-box" style="transform: scale(0.8);">0.8</div>
+        <div class="code-block">scale(0.8)</div>
+    </div>
+    <div class="demo-item">
+        <div class="demo-box" style="transform: scale(1.2);">1.2</div>
+        <div class="code-block">scale(1.2)</div>
+    </div>
+    <div class="demo-item">
+        <div class="demo-box" style="transform: scaleX(1.5);">ScaleX 1.5</div>
+        <div class="code-block">scaleX(1.5)</div>
+    </div>
+</div>
+
+<h3>4. Skew (倾斜)</h3>
+<p><code>skew()</code> 方法包含两个参数值，分别表示 X 轴和 Y 轴倾斜的角度。</p>
+<div class="demo-container">
+    <div class="demo-item">
+        <div class="demo-box" style="transform: skewX(20deg);">SkewX 20deg</div>
+        <div class="code-block">skewX(20deg)</div>
+    </div>
+    <div class="demo-item">
+        <div class="demo-box" style="transform: skewY(10deg);">SkewY 10deg</div>
+        <div class="code-block">skewY(10deg)</div>
+    </div>
+    <div class="demo-item">
+        <div class="demo-box" style="transform: skew(15deg, 10deg);">Skew 15,10</div>
+        <div class="code-block">skew(15deg, 10deg)</div>
+    </div>
+</div>
+
+<h3>5. 组合变换与顺序</h3>
+<p>你可以组合多个变换，顺序很重要（从左到右应用）。坐标系会随着变换而改变。</p>
+<div class="demo-container">
+    <div class="demo-item">
+        <div class="demo-box" style="transform: translateX(50px) rotate(45deg);">Move -> Rotate</div>
+        <div class="code-block">translateX(50px) rotate(45deg)</div>
+    </div>
+    <div class="demo-item">
+        <div class="demo-box" style="transform: rotate(45deg) translateX(50px);">Rotate -> Move</div>
+        <div class="code-block">rotate(45deg) translateX(50px)</div>
+    </div>
+</div>
+<p>注意上面两个例子的区别：先旋转再平移时，平移的方向是相对于<strong>旋转后</strong>的坐标系的（即沿着 45 度角方向移动）。</p>
+
+<h3>6. Transform Origin (变换原点)</h3>
+<p><code>transform-origin</code> 允许你改变被转换元素的位置。默认原点是中心点 (50% 50%)。</p>
+<div class="demo-container">
+    <div class="demo-item">
+        <div class="demo-box" style="transform: rotate(45deg); transform-origin: top left;">Top Left</div>
+        <div class="code-block">origin: top left</div>
+    </div>
+    <div class="demo-item">
+        <div class="demo-box" style="transform: rotate(45deg); transform-origin: center;">Center</div>
+        <div class="code-block">origin: center</div>
+    </div>
+    <div class="demo-item">
+        <div class="demo-box" style="transform: rotate(45deg); transform-origin: bottom right;">Bottom Right</div>
+        <div class="code-block">origin: bottom right</div>
+    </div>
+</div>

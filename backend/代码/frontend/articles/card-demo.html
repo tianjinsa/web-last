@@ -1,0 +1,248 @@
+﻿<style>
+    /* 
+     * 样式隔离层 
+     * 使用 #card-demo-scope 作为命名空间，防止污染主站样式
+     */
+    #card-demo-scope {
+        padding: 20px;
+        overflow-x: hidden;
+        font-family: sans-serif;
+        color: #333;
+        position: relative;
+    }
+
+    /* 模拟原有的全局重置，但仅限于容器内 */
+    #card-demo-scope * {
+        box-sizing: border-box;
+    }
+
+    /* 卡片组容器 */
+    #card-demo-scope .cardgroup {
+        /* 局部变量配置 */
+        --hover-act: ;
+        --unhover-act: ;
+        --card-gap: 10px;
+
+        display: flex;
+        position: relative;
+        height: 500px; /* 增加高度以容纳内容 */
+        width: 100%;   /* 修正宽度为 100% */
+        max-width: 1000px;
+        margin: 0 auto;
+        border-radius: 20px;
+        padding: 20px 5px;
+    }
+
+    /* 单个卡片 */
+    #card-demo-scope .card {
+        display: flex;
+        flex-direction: row; /* 显式声明横向排列 */
+        height: 100%;
+        width: fit-content;
+        
+        /* 动画与过渡 */
+        transition: transform 0.3s ease;
+        border-radius: 20px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(0,0,0,0.1);
+        background: white;
+
+        /* 核心堆叠逻辑变量 */
+        --base-x: 0px;
+        --offset-x: 0px;
+        /* 使用 calc 组合变量 */
+        transform: translateX(calc(var(--base-x) + var(--offset-x))) var(--unhover-act);
+        
+        /* 确保层级正确 */
+        position: relative;
+    }
+
+    /* 卡片侧边栏（头部） */
+    #card-demo-scope .cardhead {
+        text-align: center;
+        width: 60px;
+        background-color: #e3f2fd; /* 浅蓝背景 */
+        border-right: 1px solid rgba(0,0,0,0.05);
+        border-radius: 20px 0px 0px 20px;
+        padding: 20px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #card-demo-scope .cardhead h1 {
+        writing-mode: vertical-lr; /* 竖排文字 */
+        font-size: 1.2rem;
+        margin: 0;
+        letter-spacing: 4px;
+        color: #1565c0;
+    }
+
+    /* 卡片内容区 */
+    #card-demo-scope .cardbody {
+        width: 300px;
+        background-color: #fafafa;
+        border-radius: 0px 20px 20px 0px;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    #card-demo-scope .cardbody p {
+        margin-bottom: 1em;
+        line-height: 1.6;
+        font-size: 0.95rem;
+        color: #555;
+    }
+</style>
+
+<!-- 包装容器，用于样式隔离 -->
+<div id="card-demo-scope">
+    <div class="cardgroup" id="demo-group">
+        <div class="card">
+            <div class="cardhead">
+                <h1>李白</h1>
+            </div>
+            <div class="cardbody">
+                <p>李白是唐代著名诗人，以豪放飘逸的诗风闻名于世。</p>
+                <p>他与杜甫并称为李杜，是中国文学史上最伟大的诗人之一。</p>
+                <p>李白的诗歌作品有《将进酒》、《庐山谣》等。</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cardhead">
+                <h1>杜甫</h1>
+            </div>
+            <div class="cardbody">
+                <p>杜甫是唐代著名诗人，以沉郁顿挫的诗风闻名于世。</p>
+                <p>他与李白并称为李杜，是中国文学史上最伟大的诗人之一。</p>
+                <p>杜甫的诗歌作品有《春望》、《月夜忆舍弟》等。</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cardhead">
+                <h1>孔子</h1>
+            </div>
+            <div class="cardbody">
+                <p>孔子是中国古代伟大的思想家、教育家和政治家。</p>
+                <p>他创立了儒家学派，对中国文化和社会产生了深远影响。</p>
+                <p>孔子的主要著作有《论语》，其中记录了他的言行和思想。</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="cardhead">
+                <h1>白居易</h1>
+            </div>
+            <div class="cardbody">
+                <p>白居易，字乐天，号香山居士，是唐代伟大的现实主义诗人。</p>
+                <p>他的诗歌题材广泛，形式多样，语言平易通俗，有诗魔和诗王之称。</p>
+                <p>代表作有《长恨歌》、《琵琶行》等。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 交互脚本 -->
+<script>
+    (function() {
+        // 限制脚本作用域，防止污染全局
+        const scope = document.getElementById('card-demo-scope');
+        if (!scope) return;
+
+        scope.querySelectorAll('.cardgroup').forEach(group => {
+            const cardlist = group.querySelectorAll('.card');
+            const widthlist = [];
+            let activeNode = null;
+            let allwidth = 0;
+            let totleheadwidth = 0;
+            
+            // 获取 CSS 变量定义的 hover 效果
+            const hoveract = window.getComputedStyle(group).getPropertyValue('--hover-act').trim() || 'translateY(-10px)';
+
+            cardlist.forEach((card, i) => {
+                // 设置 z-index 保证层级
+                card.style.zIndex = i + 1;
+                
+                const body = card.querySelector('.cardbody');
+                const head = card.querySelector('.cardhead');
+                
+                // --- 获取计算后的样式 ---
+                const computedStyle = window.getComputedStyle(card);
+                const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
+                const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
+                const totalBorderWidth = borderLeft + borderRight;
+
+                // 记录宽度
+                widthlist[i] = body.offsetWidth + totalBorderWidth;
+                totleheadwidth += head.offsetWidth + totalBorderWidth;
+                
+                // 1. 设置基础堆叠位置 (--base-x)
+                // 后一张卡片向左偏移，覆盖在前一张卡片的 body 上
+                if (i > 0) {
+                    allwidth += widthlist[i - 1];
+                    // 这里的逻辑是：每张卡片都向左移动，移动距离等于它前面所有卡片 body 的宽度之和
+                    // 这样它们就会堆叠在一起，只露出 header
+                    card.style.setProperty('--base-x', `-${allwidth}px`);
+                }
+                
+                // 鼠标移入事件
+                card.addEventListener('mouseenter', () => {
+                    requestAnimationFrame(() => {
+                        // 1. 还原上一个激活节点造成的影响
+                        if (activeNode !== null && activeNode !== i) {
+                            // 让之前被推开的卡片归位
+                            for (let j = activeNode + 1; j < cardlist.length; j++) {
+                                cardlist[j].style.setProperty('--offset-x', '0px');
+                            }
+                            // 让上一个 act 的卡片归位
+                            cardlist[activeNode].style.setProperty('--unhover-act', '');
+                        }
+
+                        // 2. 推开当前卡片后面的所有卡片
+                        // 向右移动的距离 = 当前卡片 body 的宽度 + 间距
+                        for (let j = i + 1; j < cardlist.length; j++) {
+                            cardlist[j].style.setProperty('--offset-x', `calc(${widthlist[i]}px + var(--card-gap))`);
+                        }
+
+                        // 3. 当前卡片应用激活效果
+                        card.style.setProperty('--unhover-act', hoveract);
+
+                        activeNode = i;
+                    });
+                });
+
+                // 鼠标移出事件
+                card.addEventListener('mouseleave', () => {
+                    requestAnimationFrame(() => {
+                        card.style.setProperty('--unhover-act', '');
+                    });
+                });
+            });
+
+            // 2. 响应式布局更新函数
+            const updateLastCardLayout = () => {
+                if (cardlist.length === 0) return;
+                const lastCard = cardlist[cardlist.length - 1];
+                const lastBody = lastCard.querySelector('.cardbody');
+                
+                // 检查是否有足够的剩余空间
+                // 如果容器宽度 > 所有头部宽度之和，则拉伸最后一张卡片填满剩余空间
+                if (totleheadwidth < group.offsetWidth - 100) {
+                    lastBody.style.minWidth = (group.offsetWidth - totleheadwidth) + 'px';
+                } else {
+                    lastBody.style.minWidth = '';
+                }
+            };
+
+            // 3. 初始化执行
+            // 稍微延迟以确保 DOM 渲染完成
+            setTimeout(updateLastCardLayout, 100);
+
+            // 4. 使用 ResizeObserver 监听父容器宽度变化
+            const observer = new ResizeObserver(() => {
+                updateLastCardLayout();
+            });
+
+            observer.observe(group);
+        });
+    })();
+</script>

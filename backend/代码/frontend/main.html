@@ -1,0 +1,81 @@
+<div id="app-shell" class="app-shell" data-shell="booting">
+    <!-- 顶部导航栏 -->
+    <header id="site-header" class="site-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="header-bar">
+                        <div class="row align-items-center">
+                            <!-- Logo 和品牌 -->
+                            <div class="col">
+                                <a class="brand" href="/about" data-route="/about" aria-label="返回网站介绍">
+                                    <img src="{{ cdn_url }}/logo-icon.svg" alt="Logo" class="brand-logo" loading="lazy" width="40" height="40">
+                                    <div>
+                                        <p class="brand-text">Alpha Docs</p>
+                                        <p id="header-tagline" class="header-tagline">记录·分享·沉淀</p>
+                                    </div>
+                                </a>
+                            </div>
+                            
+                            <!-- 导航菜单 -->
+                            <div class="col-auto">
+                                <nav class="site-nav d-flex flex-column flex-md-row" id="primary-nav" aria-label="主要导航">
+                                    <div class="nav-pill d-none d-md-block"></div>
+                                    <a href="/about" data-route="/about" data-nav="about">网站介绍</a>
+                                    <a href="/docs" data-route="/docs" data-nav="docs-search">文档搜索</a>
+                                </nav>
+                            </div>
+                            
+                            <!-- 工具栏 -->
+                            <div class="col-auto">
+                                <div class="u-flex u-items-center u-gap-2">
+                                    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换主题" aria-pressed="false">
+                                        <span class="theme-toggle__icon" id="theme-toggle-icon" aria-hidden="true">🌙</span>
+                                        <span class="theme-toggle__label" id="theme-toggle-label">夜间</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main id="site-main" class="site-main container-fluid" role="main">
+        <div class="row">
+            <div class="col-12">
+                <!-- 骨架屏占位 -->
+                <section class="skeleton">
+                    <div class="skeleton-block"></div>
+                    <div class="skeleton-block"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer id="site-footer" class="site-footer">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <!-- <div class="footer-base d-flex flex-column flex-md-row justify-content-md-between align-items-center align-items-md-start text-center text-md-start gap-3">
+                        <div>
+                            <p class="brand-text">Alpha Docs</p>
+                            <p id="footer-note" class="footer-note">构建知识森林</p>
+                        </div>
+                        <nav class="footer-links d-flex flex-wrap gap-3" aria-label="页脚导航">
+                            <a href="/about" data-route="/about">网站介绍</a>
+                            <a href="/docs" data-route="/docs">文档搜索</a>
+                            <a href="/docs/welcome" data-route="/docs/welcome" id="footer-doc-link">文档查看</a>
+                        </nav>
+                    </div> -->
+                    <div id="footer-dynamic" class="footer-dynamic"></div>
+                    <div id="footer-top-articles" class="footer-top-articles is-hidden" aria-live="polite"></div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+

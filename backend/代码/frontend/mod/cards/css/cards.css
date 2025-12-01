@@ -1,0 +1,25 @@
+.card-t {
+    height: 100% !important;
+    width: fit-content !important;
+    height: 100% !important;
+
+    --base-x: 0px;
+    --offset-x: 0px;
+    /* 使用 calc 组合变量 */
+    will-change: transform;
+    transform: translate3d(calc(var(--base-x) + var(--offset-x)), 0, 0) var(--unhover-act) !important;
+    transition: transform 0.3s ease !important;
+}
+
+
+
+.cardgroup {
+    /*可选全局配置*/
+    --hover-act: ;/*卡片被悬停时的变换效果*/
+    --unhover-act: ;/*卡片未被悬停时的变换效果*/
+    --card-gap: ;/*卡片之间的间距*/
+
+    display: flex !important;
+    position: relative !important;
+}
+
